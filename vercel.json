@@ -1,19 +1,10 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next",
-      "config": {
-        "includeFiles": [
-          "next.config.js",
-          "next.config.ts"
-        ]
-      }
-    }
-  ],
   "buildCommand": "pnpm build",
   "installCommand": "corepack enable && pnpm install --no-frozen-lockfile",
   "outputDirectory": ".next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "env": {
+    "ENABLE_EXPERIMENTAL_COREPACK": "1"
+  }
 }
