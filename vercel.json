@@ -13,7 +13,7 @@
     }
   ],
   "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "outputDirectory": ".next",
   "framework": "nextjs"
 }

@@ -38,7 +38,7 @@ export default createManifestHandler({
       {
         label: "高级富文本编辑器",
         mount: "PRODUCT_DETAILS_MORE_ACTIONS",
-        target: "POPUP",
+        target: "APP_PAGE",
         permissions: ["MANAGE_PRODUCTS"],
         url: `${iframeBaseUrl}/rich-editor`
       }

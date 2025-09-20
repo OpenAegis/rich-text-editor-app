@@ -42,15 +42,9 @@ const EditorJSWrapper = ({ appBridge }: any) => {
           holder: 'editorjs',
           tools: {
             // @ts-ignore
-            header: {
-              class: Header,
-              tunes: ['textVariant']
-            },
+            header: Header,
             // @ts-ignore
-            list: {
-              class: List,
-              tunes: ['textVariant']
-            },
+            list: List,
             // @ts-ignore
             image: {
               class: Image,
@@ -62,31 +56,17 @@ const EditorJSWrapper = ({ appBridge }: any) => {
               }
             },
             // @ts-ignore
-            table: {
-              class: Table,
-              tunes: ['textVariant']
-            },
+            table: Table,
             // @ts-ignore
-            quote: {
-              class: Quote,
-              tunes: ['textVariant']
-            },
+            quote: Quote,
             // @ts-ignore
-            embed: {
-              class: Embed
-            },
+            embed: Embed,
             // @ts-ignore
-            marker: {
-              class: Marker
-            },
+            marker: Marker,
             // @ts-ignore
-            underline: {
-              class: Underline
-            },
+            underline: Underline,
             // @ts-ignore
-            inlineCode: {
-              class: InlineCode
-            },
+            inlineCode: InlineCode,
             // @ts-ignore
             textVariant: {
               class: TextVariantTune,

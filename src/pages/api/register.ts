@@ -13,7 +13,9 @@ export default createAppRegisterHandler({
    * Allow all Saleor URLs for installation
    * You can restrict this to specific domains if needed
    */
-  allowedSaleorUrls: (saleorApiUrl, request) => {
-    return true;
-  },
+  allowedSaleorUrls: [
+    (saleorApiUrl: string) => {
+      return true;
+    }
+  ],
 });
