@@ -26,7 +26,7 @@ export default createManifestHandler({
         mount: "PRODUCT_DETAILS_MORE_ACTIONS",
         target: "POPUP",
         permissions: ["MANAGE_PRODUCTS"],
-        url: `${iframeBaseUrl}/api/server-widget`
+        url: `${apiBaseURL}/api/server-widget`
       },
       {
         label: "Order widget example", 

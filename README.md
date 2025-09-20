@@ -110,3 +110,16 @@ The choice of the APL is made using the `APL` environment variable. If the value
 - `upstash`: use [Upstash](https://upstash.com/) Redis as storage method. Free account required. It can be used for development and production and supports multi-tenancy. Requires `UPSTASH_URL` and `UPSTASH_TOKEN` environment variables to be set
 
 If you want to use your own database, you can implement your own APL. [Check the documentation to read more](https://docs.saleor.io/developer/extending/apps/developing-apps/app-sdk/apl).
+
+### Deploying to Vercel
+
+This app can be deployed to Vercel. To ensure proper deployment:
+
+1. Make sure you have added the `vercel.json` configuration file
+2. Set the install command to `pnpm install`
+3. Set the build command to `pnpm build`
+4. Add the required environment variables:
+   - `APP_IFRAME_BASE_URL` - The base URL where your app will be hosted
+   - `APP_API_BASE_URL` - The base URL where your app's API will be accessible
+
+For production deployments, consider using a proper APL implementation like Upstash instead of the default FileAPL.
