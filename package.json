@@ -5,7 +5,7 @@
   "license": "(BSD-3-Clause AND CC-BY-4.0)",
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS='--inspect' next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -33,7 +33,21 @@
     "next": "15.1.7",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "urql": "^4.0.2"
+    "urql": "^4.0.2",
+    "@editorjs/editorjs": "^2.28.2",
+    "@editorjs/header": "^2.7.0",
+    "@editorjs/list": "^1.9.0",
+    "@editorjs/image": "^2.9.0",
+    "@editorjs/table": "^2.3.0",
+    "@editorjs/quote": "^2.5.0",
+    "@editorjs/embed": "^2.7.4",
+    "@editorjs/marker": "^1.4.0",
+    "@editorjs/underline": "^1.2.1",
+    "@editorjs/inline-code": "^1.5.2",
+    "@editorjs/text-variant-tune": "^1.0.3",
+    "editorjs-text-color-plugin": "^2.0.4",
+    "editorjs-undo": "^2.0.28",
+    "formidable": "^3.5.1"
   },
   "packageManager": "pnpm@10.12.1",
   "devDependencies": {

@@ -20,42 +20,32 @@ export default createManifestHandler({
     const iframeBaseUrl = process.env.APP_IFRAME_BASE_URL ?? appBaseUrl;
     const apiBaseURL = process.env.APP_API_BASE_URL ?? appBaseUrl;
 
-    const extensionsForSaleor3_22: AppExtension[] = [
-        {
-          url: apiBaseURL + "/api/server-widget",
-          permissions: [],
-          mount: "PRODUCT_DETAILS_WIDGETS",
-          label: "Product Timestamps",
-          target: "WIDGET",
-          options: {
-            widgetTarget: {
-              method: "POST",
-            },
-          },
-        },
-        {
-          url: iframeBaseUrl+"/client-widget",
-          permissions: [],
-          mount: "ORDER_DETAILS_WIDGETS",
-          label: "Order widget example",
-          target: "WIDGET",
-          options: {
-            widgetTarget: {
-              method: "GET",
-            },
-          },
-        },
-      ]
-
-    const saleorMajor = schemaVersion && schemaVersion[0];
-    const saleorMinor = schemaVersion && schemaVersion[1]
-
-    const is3_22 = saleorMajor === 3 && saleorMinor === 22;
-
-    const extensions = is3_22 ? extensionsForSaleor3_22 : [];
+    const extensions: AppExtension[] = [
+      {
+        label: "Product Timestamps",
+        mount: "PRODUCT_DETAILS_MORE_ACTIONS",
+        target: "POPUP",
+        permissions: ["MANAGE_PRODUCTS"],
+        url: `${iframeBaseUrl}/api/server-widget`
+      },
+      {
+        label: "Order widget example", 
+        mount: "ORDER_DETAILS_MORE_ACTIONS",
+        target: "POPUP",
+        permissions: ["MANAGE_ORDERS"],
+        url: `${iframeBaseUrl}/client-widget`
+      },
+      {
+        label: "高级富文本编辑器",
+        mount: "PRODUCT_DETAILS_MORE_ACTIONS",
+        target: "POPUP",
+        permissions: ["MANAGE_PRODUCTS"],
+        url: `${iframeBaseUrl}/rich-editor`
+      }
+    ];
 
     const manifest: AppManifest = {
-      name: "Saleor App Template",
+      name: "富文本编辑器扩展",
       tokenTargetUrl: `${apiBaseURL}/api/register`,
       appUrl: iframeBaseUrl,
       /**
@@ -69,8 +59,9 @@ export default createManifestHandler({
          * This can be removed
          */
         "MANAGE_ORDERS",
+        "MANAGE_PRODUCTS"
       ],
-      id: "saleor.app",
+      id: "rich.text.editor.app",
       version: packageJson.version,
       /**
        * Configure webhooks here. They will be created in Saleor during installation
@@ -89,7 +80,8 @@ export default createManifestHandler({
        * https://docs.saleor.io/docs/3.x/developer/extending/apps/extending-dashboard-with-apps
        */
       extensions: extensions,
-      author: "Saleor Commerce",
+      author: "您的公司名称",
+      about: "为商品详情提供高级富文本编辑功能",
       brand: {
         logo: {
           default: `${apiBaseURL}/logo.png`,
