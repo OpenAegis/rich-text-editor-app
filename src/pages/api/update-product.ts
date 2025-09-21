@@ -28,11 +28,15 @@ const GET_PRODUCT_QUERY = `
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    console.log('Update product API called, method:', req.method);
+    
     // 获取所有已安装的认证数据
     const allAuthData = await saleorApp.apl.getAll();
+    console.log('All auth data keys:', Object.keys(allAuthData));
     const authEntries = Object.entries(allAuthData);
     
     if (authEntries.length === 0) {
+      console.log('No auth data found');
       return res.status(401).json({ 
         success: false, 
         message: 'No Saleor instances found. Please install the app first.' 
@@ -41,6 +45,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 使用第一个可用的认证数据（在生产环境中可能需要更智能的选择）
     const [saleorApiUrl, authData] = authEntries[0];
+    console.log('Using Saleor URL:', saleorApiUrl);
+    console.log('Auth data available:', !!authData, !!authData?.token);
     
     if (!authData || !authData.token) {
       return res.status(401).json({ 
@@ -49,10 +55,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-  if (req.method === 'POST') {
-    // 更新商品描述
-    try {
+    if (req.method === 'POST') {
+      // 更新商品描述
       const { productId, description } = req.body;
+      console.log('POST request - Product ID:', productId, 'Description length:', description?.length);
       
       if (!productId || description === undefined) {
         return res.status(400).json({ 
@@ -61,6 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
+      console.log('Sending GraphQL request to:', saleorApiUrl);
       const response = await fetch(saleorApiUrl, {
         method: 'POST',
         headers: {
@@ -78,7 +85,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
       });
 
+      console.log('GraphQL response status:', response.status);
       const result = await response.json();
+      console.log('GraphQL result:', JSON.stringify(result, null, 2));
 
       if (result.errors) {
         console.error('GraphQL errors:', result.errors);
