@@ -3,6 +3,10 @@ import { Box, Button, Input, Text } from "@saleor/macaw-ui";
 import { NextPage } from "next";
 import Link from "next/link";
 import { MouseEventHandler, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+// 动态导入应用管理组件
+const AppManagement = dynamic(() => import('../components/AppManagement'), { ssr: false });
 
 const AddToSaleorForm = () => (
   <Box
@@ -70,9 +74,17 @@ const IndexPage: NextPage = () => {
         Saleor app.
       </Text>
       {appBridgeState?.ready && mounted && (
-        <Link href="/actions">
-          <Button variant="secondary">See what your app can do →</Button>
-        </Link>
+        <>
+          <Box display="flex" gap={4} marginBottom={6}>
+            <Link href="/actions">
+              <Button variant="secondary">See what your app can do →</Button>
+            </Link>
+            <Link href="/rich-editor">
+              <Button variant="primary">富文本编辑器 →</Button>
+            </Link>
+          </Box>
+          <AppManagement appBridge={appBridge} />
+        </>
       )}
 
       <Text as={"p"} marginTop={8}>
