@@ -15,41 +15,20 @@ export default function RichEditor() {
   const [productId, setProductId] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('RichEditor mounted, window.location:', window.location);
-    console.log('Window location search:', window.location.search);
-    
-    // 从URL参数获取商品ID
+    // 从当前页面URL中直接获取productId参数
     const urlParams = new URLSearchParams(window.location.search);
-    console.log('URL params:', Object.fromEntries(urlParams.entries()));
+    const productIdFromUrl = urlParams.get('productId');
     
-    // 尝试获取不同的参数名
-    const id = urlParams.get('id') || urlParams.get('productId');
-    console.log('Extracted ID from URL:', id);
-    
-    if (id) {
-      setProductId(id);
+    if (productIdFromUrl) {
+      setProductId(productIdFromUrl);
     } else {
-      // 如果没有ID参数，尝试从appBridge获取上下文
-      console.log('No ID in URL, trying to get from appBridge context');
-      if (appBridge) {
-        // 尝试获取当前上下文
-        try {
-          const state = appBridge.getState();
-          console.log('AppBridge state:', state);
-          // 简化处理，不依赖特定属性
-          appBridge.dispatch({
-            type: "redirect",
-            payload: {
-              actionId: "redirect-to-products",
-              to: "/products"
-            }
-          });
-        } catch (error) {
-          console.error('Error getting AppBridge state:', error);
-        }
+      // 如果没有productId参数，尝试获取id参数
+      const idFromUrl = urlParams.get('id');
+      if (idFromUrl) {
+        setProductId(idFromUrl);
       }
     }
-  }, [appBridge]);
+  }, []);
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -68,12 +47,7 @@ export default function RichEditor() {
       </div>
       
       {productId ? (
-        <div>
-          <div style={{ marginBottom: '10px', fontSize: '12px', color: '#666' }}>
-            Product ID: {productId}
-          </div>
-          <EditorJSWrapper appBridge={appBridge} productId={productId} />
-        </div>
+        <EditorJSWrapper appBridge={appBridge} productId={productId} />
       ) : (
         <div style={{ padding: '20px', textAlign: 'center' }}>
           <p>加载中...</p>
