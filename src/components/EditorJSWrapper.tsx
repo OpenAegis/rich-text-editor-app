@@ -21,38 +21,19 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         // 获取Saleor认证头部
         const { token, saleorApiUrl } = appBridge.getState();
         
-        // 直接调用Saleor GraphQL API
-        const GET_PRODUCT_QUERY = `
-          query GetProduct($id: ID!) {
-            product(id: $id) {
-              id
-              description
-              name
-            }
-          }
-        `;
-        
-        const response = await fetch(saleorApiUrl, {
-          method: 'POST',
+        const response = await fetch(`/api/update-product?productId=${encodeURIComponent(productId)}`, {
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            query: GET_PRODUCT_QUERY,
-            variables: {
-              id: productId
-            }
-          })
+            'saleor-api-url': saleorApiUrl,
+          }
         });
-        
         const data = await response.json();
-        console.log('GraphQL response:', data);
+        console.log('Load content response:', data);
         
-        if (data.data?.product?.description) {
+        if (data.success && data.product && data.product.description) {
           // 尝试解析描述为 JSON（如果是 EditorJS 格式）
           try {
-            return JSON.parse(data.data.product.description);
+            return JSON.parse(data.product.description);
           } catch {
             // 如果不是 JSON，转换为 EditorJS 格式
             return {
@@ -60,7 +41,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 {
                   type: "paragraph",
                   data: {
-                    text: data.data.product.description
+                    text: data.product.description
                   }
                 }
               ]
@@ -243,44 +224,25 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       // 获取Saleor认证头部
       const { token, saleorApiUrl } = appBridge.getState();
       
-      // 直接调用Saleor GraphQL API更新商品
-      const UPDATE_PRODUCT_MUTATION = `
-        mutation UpdateProduct($id: ID!, $input: ProductInput!) {
-          productUpdate(id: $id, input: $input) {
-            product {
-              id
-              description
-            }
-            errors {
-              field
-              message
-            }
-          }
-        }
-      `;
-      
-      const response = await fetch(saleorApiUrl, {
+      // 发送数据到服务器保存到商品描述
+      const response = await fetch('/api/update-product', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'saleor-api-url': saleorApiUrl,
         },
         body: JSON.stringify({
-          query: UPDATE_PRODUCT_MUTATION,
-          variables: {
-            id: productId,
-            input: {
-              description: JSON.stringify(outputData)
-            }
-          }
-        })
+          productId: productId,
+          description: JSON.stringify(outputData)
+        }),
       });
 
       console.log('Save response:', response.status);
       const result = await response.json();
-      console.log('GraphQL result:', result);
+      console.log('Save result:', result);
       
-      if (result.data?.productUpdate?.product) {
+      if (result.success) {
         // 显示成功通知
         // @ts-ignore
         appBridge.dispatch({
@@ -292,8 +254,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           }
         });
       } else {
-        const errors = result.data?.productUpdate?.errors || result.errors || [];
-        throw new Error(errors[0]?.message || '保存失败');
+        throw new Error(result.message || '保存失败');
       }
     } catch (error: any) {
       console.error('Save error:', error);
