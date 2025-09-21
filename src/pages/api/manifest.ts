@@ -104,7 +104,7 @@ export default createManifestHandler({
        * https://docs.saleor.io/docs/3.x/developer/extending/apps/extending-dashboard-with-apps
        */
       extensions: extensions,
-      author: "您的公司名称",
+      author: "OpenAegis",
       about: "为商品详情提供高级富文本编辑功能",
       brand: {
         logo: {

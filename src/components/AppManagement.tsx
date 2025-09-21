@@ -8,63 +8,6 @@ interface AppManagementProps {
 const AppManagement = ({ appBridge, saleorApiUrl = 'https://api.lzsm.shop/graphql/' }: AppManagementProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleUninstall = async () => {
-    if (!confirm('确定要卸载此应用吗？这将删除所有相关数据。')) {
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/app-management?action=uninstall', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          saleorApiUrl: saleorApiUrl
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        appBridge.dispatch({
-          type: "notification",
-          payload: {
-            actionId: "uninstall-success",
-            status: "success",
-            title: "应用已卸载",
-            text: "应用已成功卸载，页面将自动关闭"
-          }
-        });
-
-        // 延迟关闭，让用户看到通知
-        setTimeout(() => {
-          appBridge.dispatch({
-            type: "redirect",
-            payload: {
-              to: "/apps"
-            }
-          });
-        }, 2000);
-      } else {
-        throw new Error(result.message || '卸载失败');
-      }
-    } catch (error: any) {
-      console.error('Uninstall error:', error);
-      appBridge.dispatch({
-        type: "notification",
-        payload: {
-          actionId: "uninstall-error",
-          status: "error",
-          title: "卸载失败",
-          text: error.message || '请稍后重试'
-        }
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleUpdate = async () => {
     setIsLoading(true);
@@ -126,11 +69,6 @@ const AppManagement = ({ appBridge, saleorApiUrl = 'https://api.lzsm.shop/graphq
     color: 'white'
   };
 
-  const uninstallButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: '#dc3545',
-    color: 'white'
-  };
 
   const disabledButtonStyle = {
     ...buttonStyle,
@@ -170,24 +108,6 @@ const AppManagement = ({ appBridge, saleorApiUrl = 'https://api.lzsm.shop/graphq
           {isLoading ? '处理中...' : '更新应用'}
         </button>
 
-        <button
-          onClick={handleUninstall}
-          disabled={isLoading}
-          style={isLoading ? disabledButtonStyle : uninstallButtonStyle}
-          onMouseOver={(e) => {
-            if (!isLoading) {
-              (e.target as HTMLElement).style.backgroundColor = '#c82333';
-            }
-          }}
-          onMouseOut={(e) => {
-            if (!isLoading) {
-              (e.target as HTMLElement).style.backgroundColor = '#dc3545';
-            }
-          }}
-        >
-          {isLoading ? '处理中...' : '卸载应用'}
-        </button>
-
         <span style={{ fontSize: '12px', color: '#666', marginLeft: '10px' }}>
           当前版本: v1.0.0
         </span>
@@ -200,7 +120,7 @@ const AppManagement = ({ appBridge, saleorApiUrl = 'https://api.lzsm.shop/graphq
         lineHeight: '1.4'
       }}>
         • 更新应用：刷新应用配置和权限<br/>
-        • 卸载应用：完全移除应用及其数据
+        • 卸载应用：请使用 Saleor Dashboard 中的应用管理功能
       </p>
     </div>
   );

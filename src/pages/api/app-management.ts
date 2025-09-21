@@ -10,9 +10,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     switch (action) {
-      case 'uninstall':
-        await handleUninstall(req, res);
-        break;
       case 'update':
         await handleUpdate(req, res);
         break;
@@ -29,36 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-async function handleUninstall(req: NextApiRequest, res: NextApiResponse) {
-  const { saleorApiUrl } = req.body;
-  
-  if (!saleorApiUrl) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'Saleor API URL is required' 
-    });
-  }
-
-  try {
-    // 从APL中删除认证数据
-    await saleorApp.apl.delete(saleorApiUrl);
-    
-    // 清理应用数据
-    // 这里可以添加清理用户数据的逻辑
-    console.log(`App uninstalled for domain: ${saleorApiUrl}`);
-    
-    res.status(200).json({ 
-      success: true, 
-      message: 'App successfully uninstalled' 
-    });
-  } catch (error) {
-    console.error('Uninstall error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to uninstall app' 
-    });
-  }
-}
 
 async function handleUpdate(req: NextApiRequest, res: NextApiResponse) {
   const { saleorApiUrl } = req.body;
