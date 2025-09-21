@@ -8,6 +8,17 @@ const EditorJSWrapper = ({ appBridge }: any) => {
   useEffect(() => {
     setIsClient(true);
     
+    const loadSavedContent = async () => {
+      try {
+        const response = await fetch('/api/save-content?productId=default');
+        const data = await response.json();
+        return data.success && data.content ? data.content : null;
+      } catch (error) {
+        console.error('Failed to load content:', error);
+        return null;
+      }
+    };
+    
     const initEditor = async () => {
       if (typeof window !== 'undefined') {
         // @ts-ignore
@@ -37,9 +48,13 @@ const EditorJSWrapper = ({ appBridge }: any) => {
         // @ts-ignore
         const Undo = (await import('editorjs-undo')).default;
 
+        // 加载保存的内容
+        const savedContent = await loadSavedContent();
+
         // @ts-ignore
         editorRef.current = new EditorJS({
           holder: 'editorjs',
+          data: savedContent,
           tools: {
             // @ts-ignore
             header: Header,
@@ -121,21 +136,40 @@ const EditorJSWrapper = ({ appBridge }: any) => {
   const handleSave = async () => {
     // @ts-ignore
     if (editorRef.current) {
-      // @ts-ignore
-      const outputData = await editorRef.current.save();
-      
       try {
-        // 显示成功通知
         // @ts-ignore
-        appBridge.dispatch({
-          type: "notification",
-          payload: {
-            actionId: "save-success",
-            status: "success",
-            title: "富文本内容已保存"
-          }
+        const outputData = await editorRef.current.save();
+        
+        // 发送数据到服务器保存
+        const response = await fetch('/api/save-content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: outputData,
+            productId: 'default'
+          }),
         });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          // 显示成功通知
+          // @ts-ignore
+          appBridge.dispatch({
+            type: "notification",
+            payload: {
+              actionId: "save-success",
+              status: "success",
+              title: "富文本内容已保存"
+            }
+          });
+        } else {
+          throw new Error(result.message || '保存失败');
+        }
       } catch (error: any) {
+        console.error('Save error:', error);
         // @ts-ignore
         appBridge.dispatch({
           type: "notification", 
@@ -144,7 +178,7 @@ const EditorJSWrapper = ({ appBridge }: any) => {
             status: "error",
             title: "保存失败",
             // @ts-ignore
-            text: error.message
+            text: error.message || '请稍后重试'
           }
         });
       }
