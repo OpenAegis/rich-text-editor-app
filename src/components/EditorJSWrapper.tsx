@@ -1,7 +1,7 @@
 // @ts-ignore
 import { useEffect, useRef, useState } from 'react';
 
-const EditorJSWrapper = ({ appBridge }: any) => {
+const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const editorRef = useRef<any>(null);
   const [isClient, setIsClient] = useState(false);
 
@@ -10,9 +10,28 @@ const EditorJSWrapper = ({ appBridge }: any) => {
     
     const loadSavedContent = async () => {
       try {
-        const response = await fetch('/api/save-content?productId=default');
+        const response = await fetch(`/api/update-product?productId=${productId}`);
         const data = await response.json();
-        return data.success && data.content ? data.content : null;
+        
+        if (data.success && data.product && data.product.description) {
+          // 尝试解析描述为 JSON（如果是 EditorJS 格式）
+          try {
+            return JSON.parse(data.product.description);
+          } catch {
+            // 如果不是 JSON，转换为 EditorJS 格式
+            return {
+              blocks: [
+                {
+                  type: "paragraph",
+                  data: {
+                    text: data.product.description
+                  }
+                }
+              ]
+            };
+          }
+        }
+        return null;
       } catch (error) {
         console.error('Failed to load content:', error);
         return null;
@@ -167,15 +186,15 @@ const EditorJSWrapper = ({ appBridge }: any) => {
       console.log('Editor data:', outputData);
       
       console.log('Sending save request...');
-      // 发送数据到服务器保存
-      const response = await fetch('/api/save-content', {
+      // 发送数据到服务器保存到商品描述
+      const response = await fetch('/api/update-product', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          content: outputData,
-          productId: 'default'
+          productId: productId,
+          description: JSON.stringify(outputData)
         }),
       });
 

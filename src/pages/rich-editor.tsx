@@ -12,6 +12,26 @@ const EditorJSWrapper = dynamic(() => import('../components/EditorJSWrapper'), {
 export default function RichEditor() {
   // @ts-ignore
   const { appBridge } = useAppBridge();
+  const [productId, setProductId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // 从URL参数获取商品ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    if (id) {
+      setProductId(id);
+    } else {
+      // 如果没有ID参数，尝试从appBridge获取上下文
+      if (appBridge) {
+        appBridge.dispatch({
+          type: "redirect",
+          payload: {
+            to: "/products"
+          }
+        });
+      }
+    }
+  }, [appBridge]);
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -29,7 +49,13 @@ export default function RichEditor() {
         </div>
       </div>
       
-      <EditorJSWrapper appBridge={appBridge} />
+      {productId ? (
+        <EditorJSWrapper appBridge={appBridge} productId={productId} />
+      ) : (
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <p>加载中...</p>
+        </div>
+      )}
     </div>
   );
 }
