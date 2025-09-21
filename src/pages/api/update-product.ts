@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // 使用第一个可用的认证数据（在生产环境中可能需要更智能的选择）
+    // 使用第一个可用的认证数据
     const [saleorApiUrl, authData] = authEntries[0];
     console.log('Using Saleor URL:', saleorApiUrl);
     console.log('Auth data available:', !!authData, !!authData?.token);
@@ -57,118 +57,119 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'POST') {
       // 更新商品描述
-      const { productId, description } = req.body;
-      console.log('POST request - Product ID:', productId, 'Description length:', description?.length);
-      
-      if (!productId || description === undefined) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Product ID and description are required' 
-        });
-      }
+      try {
+        const { productId, description } = req.body;
+        console.log('POST request - Product ID:', productId, 'Description length:', description?.length);
+        
+        if (!productId || description === undefined) {
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Product ID and description are required' 
+          });
+        }
 
-      console.log('Sending GraphQL request to:', saleorApiUrl);
-      const response = await fetch(saleorApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authData.token}`,
-        },
-        body: JSON.stringify({
-          query: UPDATE_PRODUCT_MUTATION,
-          variables: {
-            id: productId,
-            input: {
-              description: description
+        console.log('Sending GraphQL request to:', saleorApiUrl);
+        const response = await fetch(saleorApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authData.token}`,
+          },
+          body: JSON.stringify({
+            query: UPDATE_PRODUCT_MUTATION,
+            variables: {
+              id: productId,
+              input: {
+                description: description
+              }
             }
-          }
-        })
-      });
+          })
+        });
 
-      console.log('GraphQL response status:', response.status);
-      const result = await response.json();
-      console.log('GraphQL result:', JSON.stringify(result, null, 2));
+        console.log('GraphQL response status:', response.status);
+        const result = await response.json();
+        console.log('GraphQL result:', JSON.stringify(result, null, 2));
 
-      if (result.errors) {
-        console.error('GraphQL errors:', result.errors);
-        return res.status(400).json({ 
+        if (result.errors) {
+          console.error('GraphQL errors:', result.errors);
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Failed to update product',
+            errors: result.errors
+          });
+        }
+
+        if (result.data.productUpdate.errors.length > 0) {
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Product update failed',
+            errors: result.data.productUpdate.errors
+          });
+        }
+
+        res.status(200).json({ 
+          success: true, 
+          message: 'Product description updated successfully',
+          product: result.data.productUpdate.product
+        });
+      } catch (error) {
+        console.error('Update product error:', error);
+        res.status(500).json({ 
           success: false, 
-          message: 'Failed to update product',
-          errors: result.errors
+          message: 'Failed to update product description' 
         });
       }
+    } else if (req.method === 'GET') {
+      // 获取商品描述
+      try {
+        const { productId } = req.query;
+        
+        if (!productId) {
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Product ID is required' 
+          });
+        }
 
-      if (result.data.productUpdate.errors.length > 0) {
-        return res.status(400).json({ 
+        const response = await fetch(saleorApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authData.token}`,
+          },
+          body: JSON.stringify({
+            query: GET_PRODUCT_QUERY,
+            variables: {
+              id: productId
+            }
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.errors) {
+          console.error('GraphQL errors:', result.errors);
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Failed to fetch product',
+            errors: result.errors
+          });
+        }
+
+        res.status(200).json({ 
+          success: true, 
+          product: result.data.product
+        });
+      } catch (error) {
+        console.error('Get product error:', error);
+        res.status(500).json({ 
           success: false, 
-          message: 'Product update failed',
-          errors: result.data.productUpdate.errors
+          message: 'Failed to fetch product' 
         });
       }
-
-      res.status(200).json({ 
-        success: true, 
-        message: 'Product description updated successfully',
-        product: result.data.productUpdate.product
-      });
-    } catch (error) {
-      console.error('Update product error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Failed to update product description' 
-      });
+    } else {
+      res.status(405).json({ message: 'Method not allowed' });
     }
-  } else if (req.method === 'GET') {
-    // 获取商品描述
-    try {
-      const { productId } = req.query;
-      
-      if (!productId) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Product ID is required' 
-        });
-      }
-
-      const response = await fetch(saleorApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authData.token}`,
-        },
-        body: JSON.stringify({
-          query: GET_PRODUCT_QUERY,
-          variables: {
-            id: productId
-          }
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        console.error('GraphQL errors:', result.errors);
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Failed to fetch product',
-          errors: result.errors
-        });
-      }
-
-      res.status(200).json({ 
-        success: true, 
-        product: result.data.product
-      });
-    } catch (error) {
-      console.error('Get product error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Failed to fetch product' 
-      });
-    }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
-  }
   } catch (error) {
     console.error('API handler error:', error);
     res.status(500).json({ 
