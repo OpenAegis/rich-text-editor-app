@@ -32,61 +32,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Request query:', req.query);
     console.log('Request body:', req.body);
     
-    // 根据 productId 获取认证数据
+    // 获取所有可用的认证数据
     let authData, saleorApiUrl;
     
-    if (req.method === 'POST') {
-      const { productId } = req.body;
-      if (productId) {
-        try {
-          authData = await saleorApp.apl.get(productId);
-          if (authData) {
-            saleorApiUrl = authData.saleorApiUrl;
-            console.log('Found auth data for productId:', productId);
-          } else {
-            console.log('No auth data found for productId:', productId);
-          }
-        } catch (error) {
-          console.log('Could not get auth data by productId, trying to get first available:', error);
-        }
-      }
-    } else if (req.method === 'GET') {
-      const { productId } = req.query;
-      if (productId && typeof productId === 'string') {
-        try {
-          authData = await saleorApp.apl.get(productId);
-          if (authData) {
-            saleorApiUrl = authData.saleorApiUrl;
-            console.log('Found auth data for productId:', productId);
-          } else {
-            console.log('No auth data found for productId:', productId);
-          }
-        } catch (error) {
-          console.log('Could not get auth data by productId, trying to get first available:', error);
-        }
-      }
-    }
-
-    // 如果没有通过 productId 找到认证数据，尝试获取第一个可用的
-    if (!authData || !saleorApiUrl) {
-      console.log('Trying to get first available auth data');
+    // 对于支持 getAll 的 APL（如 FileAPL）
+    try {
+      const allAuthData = await saleorApp.apl.getAll();
+      console.log('All auth data keys:', Object.keys(allAuthData));
+      const authEntries = Object.entries(allAuthData);
       
-      // 对于支持 getAll 的 APL（如 FileAPL）
-      try {
-        const allAuthData = await saleorApp.apl.getAll();
-        console.log('All auth data keys:', Object.keys(allAuthData));
-        const authEntries = Object.entries(allAuthData);
-        
-        if (authEntries.length > 0) {
-          // 使用第一个可用的认证数据
-          const [firstSaleorApiUrl, firstAuthData] = authEntries[0];
-          authData = firstAuthData;
-          saleorApiUrl = firstSaleorApiUrl;
-          console.log('Using first available auth data');
+      if (authEntries.length > 0) {
+        // 使用第一个可用的认证数据
+        const [firstSaleorApiUrl, firstAuthData] = authEntries[0];
+        authData = firstAuthData;
+        saleorApiUrl = firstSaleorApiUrl;
+        console.log('Using first available auth data');
+      }
+    } catch (error: any) {
+      // UpstashAPL 不支持 getAll，这是正常的
+      console.log('APL does not support getAll, this is expected for UpstashAPL:', error.message || error);
+      
+      // 尝试通过 productId 获取认证数据
+      if (req.method === 'POST') {
+        const { productId } = req.body;
+        if (productId) {
+          try {
+            authData = await saleorApp.apl.get(productId);
+            if (authData) {
+              saleorApiUrl = authData.saleorApiUrl;
+              console.log('Found auth data for productId:', productId);
+            } else {
+              console.log('No auth data found for productId:', productId);
+            }
+          } catch (error) {
+            console.log('Could not get auth data by productId:', error);
+          }
         }
-      } catch (error: any) {
-        // UpstashAPL 不支持 getAll，这是正常的
-        console.log('APL does not support getAll, this is expected for UpstashAPL:', error.message || error);
+      } else if (req.method === 'GET') {
+        const { productId } = req.query;
+        if (productId && typeof productId === 'string') {
+          try {
+            authData = await saleorApp.apl.get(productId);
+            if (authData) {
+              saleorApiUrl = authData.saleorApiUrl;
+              console.log('Found auth data for productId:', productId);
+            } else {
+              console.log('No auth data found for productId:', productId);
+            }
+          } catch (error) {
+            console.log('Could not get auth data by productId:', error);
+          }
+        }
       }
     }
 
