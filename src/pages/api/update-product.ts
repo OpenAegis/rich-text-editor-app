@@ -43,9 +43,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           if (authData) {
             saleorApiUrl = authData.saleorApiUrl;
             console.log('Found auth data for productId:', productId);
+          } else {
+            console.log('No auth data found for productId:', productId);
           }
         } catch (error) {
-          console.log('Could not get auth data by productId, trying to get first available');
+          console.log('Could not get auth data by productId, trying to get first available:', error);
         }
       }
     } else if (req.method === 'GET') {
@@ -56,9 +58,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           if (authData) {
             saleorApiUrl = authData.saleorApiUrl;
             console.log('Found auth data for productId:', productId);
+          } else {
+            console.log('No auth data found for productId:', productId);
           }
         } catch (error) {
-          console.log('Could not get auth data by productId, trying to get first available');
+          console.log('Could not get auth data by productId, trying to get first available:', error);
         }
       }
     }
@@ -80,9 +84,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           saleorApiUrl = firstSaleorApiUrl;
           console.log('Using first available auth data');
         }
-      } catch (error) {
+      } catch (error: any) {
         // UpstashAPL 不支持 getAll，这是正常的
-        console.log('APL does not support getAll, this is expected for UpstashAPL');
+        console.log('APL does not support getAll, this is expected for UpstashAPL:', error.message || error);
       }
     }
 
