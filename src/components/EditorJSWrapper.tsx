@@ -10,8 +10,16 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
     
     const loadSavedContent = async () => {
       try {
-        const response = await fetch(`/api/update-product?productId=${productId}`);
+        // 确保 productId 是有效的
+        if (!productId) {
+          console.log('No productId provided');
+          return null;
+        }
+        
+        console.log('Loading content for productId:', productId);
+        const response = await fetch(`/api/update-product?productId=${encodeURIComponent(productId)}`);
         const data = await response.json();
+        console.log('Load content response:', data);
         
         if (data.success && data.product && data.product.description) {
           // 尝试解析描述为 JSON（如果是 EditorJS 格式）
@@ -162,6 +170,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const handleSave = async () => {
     console.log('Save button clicked');
     console.log('Editor ref:', editorRef.current);
+    console.log('ProductId:', productId);
     
     // @ts-ignore
     if (!editorRef.current) {
@@ -174,6 +183,22 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           status: "error",
           title: "编辑器未初始化",
           text: "请等待编辑器加载完成"
+        }
+      });
+      return;
+    }
+
+    // 确保 productId 是有效的
+    if (!productId) {
+      console.error('No productId provided');
+      // @ts-ignore
+      appBridge.dispatch({
+        type: "notification",
+        payload: {
+          actionId: "save-error",
+          status: "error",
+          title: "缺少商品ID",
+          text: "无法保存内容，请刷新页面重试"
         }
       });
       return;

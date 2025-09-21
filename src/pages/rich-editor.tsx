@@ -17,7 +17,8 @@ export default function RichEditor() {
   useEffect(() => {
     // 从URL参数获取商品ID
     const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
+    // 尝试获取不同的参数名
+    const id = urlParams.get('id') || urlParams.get('productId');
     if (id) {
       setProductId(id);
     } else {
