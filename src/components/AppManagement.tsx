@@ -109,7 +109,7 @@ const AppManagement = ({ appBridge, saleorApiUrl = 'https://api.lzsm.shop/graphq
         </button>
 
         <span style={{ fontSize: '12px', color: '#666', marginLeft: '10px' }}>
-          当前版本: v1.1.0
+          当前版本: v1.1.1
         </span>
       </div>
 

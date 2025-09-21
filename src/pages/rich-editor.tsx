@@ -26,6 +26,7 @@ export default function RichEditor() {
         appBridge.dispatch({
           type: "redirect",
           payload: {
+            actionId: "redirect-to-products",
             to: "/products"
           }
         });
