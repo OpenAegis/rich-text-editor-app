@@ -20,59 +20,35 @@ export default createManifestHandler({
     const iframeBaseUrl = process.env.APP_IFRAME_BASE_URL ?? appBaseUrl;
     const apiBaseURL = process.env.APP_API_BASE_URL ?? appBaseUrl;
 
-    // 确保 URL 是绝对路径且格式正确
-    const ensureAbsoluteUrl = (url: string) => {
-      // 如果已经是完整的 URL，直接返回
-      if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url;
-      }
-      
-      // 如果基础 URL 末尾有斜杠，去掉它
-      const cleanBaseURL = apiBaseURL.endsWith('/') ? apiBaseURL.slice(0, -1) : apiBaseURL;
-      
-      // 如果路径开头没有斜杠，加上它
-      const cleanPath = url.startsWith('/') ? url : `/${url}`;
-      
-      return `${cleanBaseURL}${cleanPath}`;
-    };
-
-    // 确保 appUrl 是有效的绝对 URL
-    const getAppUrl = () => {
-      if (iframeBaseUrl.startsWith('http://') || iframeBaseUrl.startsWith('https://')) {
-        return iframeBaseUrl;
-      }
-      return apiBaseURL;
-    };
-
     const extensions: AppExtension[] = [
       {
         label: "Product Timestamps",
         mount: "PRODUCT_DETAILS_MORE_ACTIONS",
         target: "POPUP",
         permissions: ["MANAGE_PRODUCTS"],
-        url: ensureAbsoluteUrl("/api/server-widget")
+        url: `${apiBaseURL}/api/server-widget`
       },
       {
         label: "Order widget example", 
         mount: "ORDER_DETAILS_MORE_ACTIONS",
         target: "POPUP",
         permissions: ["MANAGE_ORDERS"],
-        url: ensureAbsoluteUrl("/client-widget")
+        url: `${iframeBaseUrl}/client-widget`
       },
       {
         label: "高级富文本编辑器",
         mount: "PRODUCT_DETAILS_MORE_ACTIONS",
         target: "APP_PAGE",
         permissions: ["MANAGE_PRODUCTS"],
-        // 使用特殊语法让 Saleor 自动附加正确的上下文参数
-        url: ensureAbsoluteUrl("/rich-editor?productId={product.id}")
+        // 对于 APP_PAGE target，使用相对路径而不是绝对URL
+        url: "/rich-editor?productId={product.id}"
       }
     ];
 
     const manifest: AppManifest = {
       name: "富文本编辑器扩展",
-      tokenTargetUrl: ensureAbsoluteUrl("/api/register"),
-      appUrl: getAppUrl(),
+      tokenTargetUrl: `${apiBaseURL}/api/register`,
+      appUrl: iframeBaseUrl,
       /**
        * Set permissions for app if needed
        * https://docs.saleor.io/docs/3.x/developer/permissions
@@ -109,7 +85,7 @@ export default createManifestHandler({
       about: "为商品详情提供高级富文本编辑功能",
       brand: {
         logo: {
-          default: ensureAbsoluteUrl("/logo.png"),
+          default: `${apiBaseURL}/logo.png`,
         },
       },
     };
