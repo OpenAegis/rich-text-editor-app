@@ -156,6 +156,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         console.log('GraphQL response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        // 检查响应是否为JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType?.includes('application/json')) {
+          const text = await response.text();
+          console.error('Non-JSON response received:', text.substring(0, 500));
+          return res.status(response.status).json({
+            success: false,
+            message: `Saleor API returned non-JSON response. Possible authentication failure.`,
+            details: {
+              status: response.status,
+              contentType,
+              responsePreview: text.substring(0, 200)
+            }
+          });
+        }
+        
         const result = await response.json();
         console.log('GraphQL result:', JSON.stringify(result, null, 2));
         
