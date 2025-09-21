@@ -135,6 +135,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         console.log('Sending GraphQL request to:', saleorApiUrl);
+        console.log('Using token:', receivedToken ? receivedToken.substring(0, 20) + '...' : 'No token');
+        console.log('Request variables:', { id: productId, description: description.substring(0, 100) + '...' });
+        
         const response = await fetch(saleorApiUrl, {
           method: 'POST',
           headers: {
@@ -155,6 +158,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('GraphQL response status:', response.status);
         const result = await response.json();
         console.log('GraphQL result:', JSON.stringify(result, null, 2));
+        
+        // 添加更详细的调试信息
+        if (!response.ok) {
+          console.error('GraphQL request failed with status:', response.status);
+          return res.status(response.status).json({
+            success: false,
+            message: `GraphQL request failed with status ${response.status}`,
+            details: result
+          });
+        }
 
         if (result.errors) {
           console.error('GraphQL errors:', result.errors);
