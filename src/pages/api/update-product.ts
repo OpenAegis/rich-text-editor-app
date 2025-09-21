@@ -29,31 +29,74 @@ const GET_PRODUCT_QUERY = `
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     console.log('Update product API called, method:', req.method);
+    console.log('Request query:', req.query);
+    console.log('Request body:', req.body);
     
-    // 获取所有已安装的认证数据
-    const allAuthData = await saleorApp.apl.getAll();
-    console.log('All auth data keys:', Object.keys(allAuthData));
-    const authEntries = Object.entries(allAuthData);
+    // 根据 productId 获取认证数据
+    let authData, saleorApiUrl;
     
-    if (authEntries.length === 0) {
-      console.log('No auth data found');
+    if (req.method === 'POST') {
+      const { productId } = req.body;
+      if (productId) {
+        try {
+          authData = await saleorApp.apl.get(productId);
+          if (authData) {
+            saleorApiUrl = authData.saleorApiUrl;
+            console.log('Found auth data for productId:', productId);
+          }
+        } catch (error) {
+          console.log('Could not get auth data by productId, trying to get first available');
+        }
+      }
+    } else if (req.method === 'GET') {
+      const { productId } = req.query;
+      if (productId && typeof productId === 'string') {
+        try {
+          authData = await saleorApp.apl.get(productId);
+          if (authData) {
+            saleorApiUrl = authData.saleorApiUrl;
+            console.log('Found auth data for productId:', productId);
+          }
+        } catch (error) {
+          console.log('Could not get auth data by productId, trying to get first available');
+        }
+      }
+    }
+
+    // 如果没有通过 productId 找到认证数据，尝试获取第一个可用的
+    if (!authData || !saleorApiUrl) {
+      console.log('Trying to get first available auth data');
+      
+      // 对于支持 getAll 的 APL（如 FileAPL）
+      try {
+        const allAuthData = await saleorApp.apl.getAll();
+        console.log('All auth data keys:', Object.keys(allAuthData));
+        const authEntries = Object.entries(allAuthData);
+        
+        if (authEntries.length > 0) {
+          // 使用第一个可用的认证数据
+          const [firstSaleorApiUrl, firstAuthData] = authEntries[0];
+          authData = firstAuthData;
+          saleorApiUrl = firstSaleorApiUrl;
+          console.log('Using first available auth data');
+        }
+      } catch (error) {
+        // UpstashAPL 不支持 getAll，这是正常的
+        console.log('APL does not support getAll, this is expected for UpstashAPL');
+      }
+    }
+
+    // 如果仍然没有认证数据，返回错误
+    if (!authData || !authData.token || !saleorApiUrl) {
+      console.log('No valid auth data found');
       return res.status(401).json({ 
         success: false, 
-        message: 'No Saleor instances found. Please install the app first.' 
+        message: 'No valid authentication data found. Please install the app first.' 
       });
     }
 
-    // 使用第一个可用的认证数据
-    const [saleorApiUrl, authData] = authEntries[0];
     console.log('Using Saleor URL:', saleorApiUrl);
     console.log('Auth data available:', !!authData, !!authData?.token);
-    
-    if (!authData || !authData.token) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid authentication data' 
-      });
-    }
 
     if (req.method === 'POST') {
       // 更新商品描述
