@@ -58,7 +58,7 @@ async function handleUpdate(req: NextApiRequest, res: NextApiResponse) {
     res.status(200).json({ 
       success: true, 
       message: 'App successfully updated',
-      version: process.env.npm_package_version || '1.0.0'
+      version: process.env.npm_package_version || 'latest'
     });
   } catch (error) {
     console.error('Update error:', error);
