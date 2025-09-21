@@ -64,7 +64,8 @@ export default createManifestHandler({
         mount: "PRODUCT_DETAILS_MORE_ACTIONS",
         target: "APP_PAGE",
         permissions: ["MANAGE_PRODUCTS"],
-        url: "/rich-editor"
+        // 使用特殊语法让 Saleor 自动附加正确的上下文参数
+        url: ensureAbsoluteUrl("/rich-editor?productId={product.id}")
       }
     ];
 
