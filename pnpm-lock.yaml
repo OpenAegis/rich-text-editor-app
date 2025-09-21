@@ -105,6 +105,9 @@ importers:
       '@saleor/eslint-plugin-saleor-app':
         specifier: ^0.2.0
         version: 0.2.0(@types/node@22.18.6)(eslint@8.57.1)
+      '@types/formidable':
+        specifier: ^3.4.5
+        version: 3.4.5
       '@types/node':
         specifier: ^22.0.0
         version: 22.18.6
@@ -2074,6 +2077,9 @@ packages:
 
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
+
+  '@types/formidable@3.4.5':
+    resolution: {integrity: sha512-s7YPsNVfnsng5L8sKnG/Gbb2tiwwJTY1conOkJzTMRvJAlLFW1nEua+ADsJQu8N1c0oTHx9+d5nqg10WuT9gHQ==}
 
   '@types/js-yaml@4.0.6':
     resolution: {integrity: sha512-ACTuifTSIIbyksx2HTon3aFtCKWcID7/h3XEmRpDYdMCXxPbl+m9GteOJeaAkiAta/NJaSFuA7ahZ0NkwajDSw==}
@@ -7359,6 +7365,10 @@ snapshots:
       '@babel/types': 7.23.0
 
   '@types/estree@1.0.5': {}
+
+  '@types/formidable@3.4.5':
+    dependencies:
+      '@types/node': 22.18.6
 
   '@types/js-yaml@4.0.6': {}
 
