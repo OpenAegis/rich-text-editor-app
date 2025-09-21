@@ -40,8 +40,8 @@ export default createManifestHandler({
         mount: "PRODUCT_DETAILS_MORE_ACTIONS",
         target: "APP_PAGE",
         permissions: ["MANAGE_PRODUCTS"],
-        // 简单的URL，让Saleor自动附加参数
-        url: "/rich-editor"
+        // 使用完整的URL
+        url: `${iframeBaseUrl}/rich-editor`
       }
     ];
 
