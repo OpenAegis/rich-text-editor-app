@@ -99,11 +99,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
         }
 
-        if (result.data.productUpdate.errors.length > 0) {
+        // 检查 productUpdate 是否存在以及是否有错误
+        if (result.data?.productUpdate?.errors && result.data.productUpdate.errors.length > 0) {
           return res.status(400).json({ 
             success: false, 
             message: 'Product update failed',
             errors: result.data.productUpdate.errors
+          });
+        }
+
+        // 检查是否成功更新了产品
+        if (!result.data?.productUpdate?.product) {
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Product update returned no product data'
           });
         }
 
@@ -153,6 +162,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             success: false, 
             message: 'Failed to fetch product',
             errors: result.errors
+          });
+        }
+
+        // 检查是否成功获取了产品数据
+        if (!result.data?.product) {
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Product not found or no data returned'
           });
         }
 
