@@ -35,7 +35,7 @@ export const createClient = (url: string, getAuth: AuthConfig<IAuthState>["getAu
                 ...fetchOptions,
                 headers: {
                   ...fetchOptions.headers,
-                  "Authorization-Bearer": authState.token,
+                  "Authorization": `Bearer ${authState.token}`,
                 },
               },
             },

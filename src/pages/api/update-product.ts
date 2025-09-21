@@ -32,71 +32,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Request query:', req.query);
     console.log('Request body:', req.body);
     
-    // 获取所有可用的认证数据
-    let authData, saleorApiUrl;
+    // 获取认证信息
+    const saleorApiUrl = req.headers['saleor-api-url'] as string;
+    const authorizationHeader = req.headers['authorization'] as string;
     
-    // 对于支持 getAll 的 APL（如 FileAPL）
-    try {
-      const allAuthData = await saleorApp.apl.getAll();
-      console.log('All auth data keys:', Object.keys(allAuthData));
-      const authEntries = Object.entries(allAuthData);
-      
-      if (authEntries.length > 0) {
-        // 使用第一个可用的认证数据
-        const [firstSaleorApiUrl, firstAuthData] = authEntries[0];
-        authData = firstAuthData;
-        saleorApiUrl = firstSaleorApiUrl;
-        console.log('Using first available auth data');
-      }
-    } catch (error: any) {
-      // UpstashAPL 不支持 getAll，这是正常的
-      console.log('APL does not support getAll, this is expected for UpstashAPL:', error.message || error);
-      
-      // 尝试通过 productId 获取认证数据
-      if (req.method === 'POST') {
-        const { productId } = req.body;
-        if (productId) {
-          try {
-            authData = await saleorApp.apl.get(productId);
-            if (authData) {
-              saleorApiUrl = authData.saleorApiUrl;
-              console.log('Found auth data for productId:', productId);
-            } else {
-              console.log('No auth data found for productId:', productId);
-            }
-          } catch (error) {
-            console.log('Could not get auth data by productId:', error);
-          }
-        }
-      } else if (req.method === 'GET') {
-        const { productId } = req.query;
-        if (productId && typeof productId === 'string') {
-          try {
-            authData = await saleorApp.apl.get(productId);
-            if (authData) {
-              saleorApiUrl = authData.saleorApiUrl;
-              console.log('Found auth data for productId:', productId);
-            } else {
-              console.log('No auth data found for productId:', productId);
-            }
-          } catch (error) {
-            console.log('Could not get auth data by productId:', error);
-          }
-        }
-      }
-    }
-
-    // 如果仍然没有认证数据，返回错误
-    if (!authData || !authData.token || !saleorApiUrl) {
-      console.log('No valid auth data found');
-      return res.status(401).json({ 
-        success: false, 
-        message: 'No valid authentication data found. Please install the app first.' 
+    if (!saleorApiUrl || !authorizationHeader) {
+      return res.status(401).json({
+        success: false,
+        message: 'Missing required authentication headers'
       });
     }
+    
+    // 从Authorization header中提取token
+    const receivedToken = authorizationHeader.replace('Bearer ', '');
+    
+    if (!receivedToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid authorization header format'
+      });
+    }
+    
+    // 从APL获取认证数据
+    let authData;
+    try {
+      authData = await saleorApp.apl.get(saleorApiUrl);
+      if (!authData) {
+        return res.status(401).json({
+          success: false,
+          message: 'No authentication data found for this Saleor instance'
+        });
+      }
+    } catch (error) {
+      console.error('Failed to get auth data:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to verify authentication'
+      });
+    }
+    
+    // 验证token是否匹配存储的token
+    if (receivedToken !== authData.token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid authentication token'
+      });
+    }
+    
+    // 从存储的数据中获取jwks用于GraphQL请求
+    const jwks = authData.jwks;
+    console.log('Token verified successfully, using jwks for GraphQL');
 
     console.log('Using Saleor URL:', saleorApiUrl);
-    console.log('Auth data available:', !!authData, !!authData?.token);
+    console.log('Authentication verified successfully');
 
     if (req.method === 'POST') {
       // 更新商品描述
@@ -116,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authData.token}`,
+            'Authorization': `Bearer ${receivedToken}`,
           },
           body: JSON.stringify({
             query: UPDATE_PRODUCT_MUTATION,
@@ -187,7 +175,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authData.token}`,
+            'Authorization': `Bearer ${receivedToken}`,
           },
           body: JSON.stringify({
             query: GET_PRODUCT_QUERY,
