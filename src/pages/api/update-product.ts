@@ -204,7 +204,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Update product error:', error);
         res.status(500).json({ 
           success: false, 
-          message: 'Failed to update product description' 
+          message: 'Failed to update product description',
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
         });
       }
     } else if (req.method === 'GET') {
@@ -260,7 +262,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Get product error:', error);
         res.status(500).json({ 
           success: false, 
-          message: 'Failed to fetch product' 
+          message: 'Failed to fetch product',
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     } else {
