@@ -40,8 +40,8 @@ export default createManifestHandler({
         mount: "PRODUCT_DETAILS_MORE_ACTIONS",
         target: "APP_PAGE",
         permissions: ["MANAGE_PRODUCTS"],
-        // 使用 {product.id} 占位符确保正确传递商品ID
-        url: "/rich-editor?productId={product.id}"
+        // 简单的URL，让Saleor自动附加参数
+        url: "/rich-editor"
       }
     ];
 
