@@ -17,7 +17,16 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         }
         
         console.log('Loading content for productId:', productId);
-        const response = await fetch(`/api/update-product?productId=${encodeURIComponent(productId)}`);
+        
+        // 获取Saleor认证头部
+        const authData = await appBridge.getAuthData();
+        
+        const response = await fetch(`/api/update-product?productId=${encodeURIComponent(productId)}`, {
+          headers: {
+            'Authorization': `Bearer ${authData.token}`,
+            'saleor-api-url': authData.saleorApiUrl,
+          }
+        });
         const data = await response.json();
         console.log('Load content response:', data);
         
@@ -211,11 +220,17 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       console.log('Editor data:', outputData);
       
       console.log('Sending save request...');
+      
+      // 获取Saleor认证头部
+      const authData = await appBridge.getAuthData();
+      
       // 发送数据到服务器保存到商品描述
       const response = await fetch('/api/update-product', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authData.token}`,
+          'saleor-api-url': authData.saleorApiUrl,
         },
         body: JSON.stringify({
           productId: productId,
