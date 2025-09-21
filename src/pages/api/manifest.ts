@@ -40,8 +40,8 @@ export default createManifestHandler({
         mount: "PRODUCT_DETAILS_MORE_ACTIONS",
         target: "APP_PAGE",
         permissions: ["MANAGE_PRODUCTS"],
-        // 使用相对路径，让 Saleor Dashboard 自动附加上下文参数
-        url: "/rich-editor"
+        // 使用 {product.id} 占位符确保正确传递商品ID
+        url: "/rich-editor?productId={product.id}"
       }
     ];
 
