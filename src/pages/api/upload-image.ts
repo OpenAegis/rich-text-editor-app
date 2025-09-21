@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+// @ts-ignore
 import formidable from 'formidable';
 import fs from 'fs';
 
