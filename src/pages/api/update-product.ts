@@ -32,56 +32,95 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Request query:', req.query);
     console.log('Request body:', req.body);
     
-    // 获取认证信息
-    const saleorApiUrl = req.headers['saleor-api-url'] as string;
-    const authorizationHeader = req.headers['authorization'] as string;
-    
-    if (!saleorApiUrl || !authorizationHeader) {
-      return res.status(401).json({
-        success: false,
-        message: 'Missing required authentication headers'
-      });
-    }
-    
-    // 从Authorization header中提取token
-    const receivedToken = authorizationHeader.replace('Bearer ', '');
-    
-    if (!receivedToken) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid authorization header format'
-      });
-    }
-    
-    // 从APL获取认证数据
+    // 获取认证信息 - 支持多种认证方式
+    let saleorApiUrl = req.headers['saleor-api-url'] as string;
+    let authorizationHeader = req.headers['authorization'] as string;
     let authData;
-    try {
-      authData = await saleorApp.apl.get(saleorApiUrl);
-      if (!authData) {
+    let receivedToken;
+
+    // 方案1: 标准Saleor Dashboard认证（有认证头）
+    if (saleorApiUrl && authorizationHeader) {
+      console.log('Using Saleor Dashboard authentication');
+      receivedToken = authorizationHeader.replace('Bearer ', '');
+      
+      if (!receivedToken) {
         return res.status(401).json({
           success: false,
-          message: 'No authentication data found for this Saleor instance'
+          message: 'Invalid authorization header format'
         });
       }
-    } catch (error) {
-      console.error('Failed to get auth data:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to verify authentication'
-      });
+      
+      try {
+        authData = await saleorApp.apl.get(saleorApiUrl);
+        if (!authData) {
+          return res.status(401).json({
+            success: false,
+            message: 'No authentication data found for this Saleor instance'
+          });
+        }
+        
+        // 验证token是否匹配存储的token
+        if (receivedToken !== authData.token) {
+          return res.status(401).json({
+            success: false,
+            message: 'Invalid authentication token'
+          });
+        }
+      } catch (error) {
+        console.error('Failed to get auth data:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to verify authentication'
+        });
+      }
+    } else {
+      // 方案2: 直接API访问（使用存储的认证数据）
+      console.log('Using direct API access, trying to get stored auth data');
+      
+      try {
+        // 尝试使用FileAPL的getAll方法获取第一个可用的认证数据
+        const allAuthData = await saleorApp.apl.getAll();
+        const authEntries = Object.entries(allAuthData);
+        
+        if (authEntries.length > 0) {
+          const [firstSaleorApiUrl, firstAuthData] = authEntries[0];
+          authData = firstAuthData;
+          saleorApiUrl = firstSaleorApiUrl;
+          receivedToken = authData.token;
+          console.log('Using first available auth data from FileAPL');
+        } else {
+          return res.status(401).json({
+            success: false,
+            message: 'No authentication data available'
+          });
+        }
+      } catch (error: any) {
+        // UpstashAPL不支持getAll，尝试使用环境变量
+        console.log('APL does not support getAll, trying environment fallback');
+        
+        // 从环境变量获取默认的Saleor API URL
+        const defaultSaleorUrl = process.env.SALEOR_API_URL || 'https://api.lzsm.shop/graphql/';
+        
+        try {
+          authData = await saleorApp.apl.get(defaultSaleorUrl);
+          if (authData) {
+            saleorApiUrl = defaultSaleorUrl;
+            receivedToken = authData.token;
+            console.log('Using stored auth data from UpstashAPL');
+          } else {
+            return res.status(401).json({
+              success: false,
+              message: 'No authentication data found'
+            });
+          }
+        } catch (aplError) {
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to retrieve authentication data'
+          });
+        }
+      }
     }
-    
-    // 验证token是否匹配存储的token
-    if (receivedToken !== authData.token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid authentication token'
-      });
-    }
-    
-    // 从存储的数据中获取jwks用于GraphQL请求
-    const jwks = authData.jwks;
-    console.log('Token verified successfully, using jwks for GraphQL');
 
     console.log('Using Saleor URL:', saleorApiUrl);
     console.log('Authentication verified successfully');
