@@ -125,29 +125,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: 0, message: 'File does not exist' });
     }
 
-    // 按照官方示例重新构建 FormData
-    const fd = new FormData();
+    // 按照最简示例重新构建 FormData
+    const form = new FormData();
     
-    const operations = {
-      query: `
-        mutation($file: Upload!) {
-          fileUpload(file: $file) {
-            uploadedFile { url contentType }
-            errors { field message code }
+    // 1. 读取文件流
+    const fileStream = fs.createReadStream(file.filepath);
+    
+    // 2. 构造 multipart/form-data
+    form.append(
+      'operations',
+      JSON.stringify({
+        query: `
+          mutation($file: Upload!) {
+            fileUpload(file: $file) {
+              uploadedFile { url contentType }
+              errors { field message code }
+            }
           }
-        }
-      `,
-      variables: { file: null }
-    };
+        `,
+        variables: { file: null },
+      })
+    );
+    form.append('map', JSON.stringify({ '0': ['variables.file'] }));
+    form.append('0', fileStream);
     
-    console.log('Operations to send:', JSON.stringify(operations));
-    
-    // 按照示例的顺序添加字段
-    fd.append('operations', JSON.stringify(operations));             // 必含 query
-    fd.append('map', JSON.stringify({ '0': ['variables.file'] }));   // 必含 map
-    fd.append('0', fs.createReadStream(file.filepath), file.originalFilename || 'upload.bin');
-    
-    console.log('FormData created with operations, map, and file');
+    console.log('FormData created exactly like the minimal example');
 
     console.log('Making request to:', saleorApiUrl);
     console.log('Using token:', token ? token.substring(0, 20) + '...' : 'No token');
@@ -156,7 +158,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const headers = {
       Authorization: `Bearer ${token}`,
-      ...fd.getHeaders()                                         // 自动添加 Content-Type 边界
+      ...form.getHeaders(),                                      // 自动添加 Content-Type 边界
     };
     
     console.log('Request headers:', headers);
@@ -188,7 +190,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
       headers,
-      body: fd as any
+      body: form,
     });
 
     console.log('Response status:', response.status);
