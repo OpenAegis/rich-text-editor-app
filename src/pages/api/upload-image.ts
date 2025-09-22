@@ -125,6 +125,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: 0, message: 'File does not exist' });
     }
 
+    // 直接读取文件内容而不是使用流
+    const fileBuffer = fs.readFileSync(file.filepath);
+    
     // 构建 multipart/form-data
     const formData = new FormData();
     
@@ -137,10 +140,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     console.log('Operations to send:', operations);
     console.log('Map to send:', map);
+    console.log('File size:', fileBuffer.length);
+    console.log('File mimetype:', file.mimetype);
     
     formData.append('operations', operations);
     formData.append('map', map);
-    formData.append('0', fs.createReadStream(file.filepath), file.originalFilename || 'upload.bin');
+    formData.append('0', fileBuffer, {
+      filename: file.originalFilename || 'upload.bin',
+      contentType: file.mimetype || 'application/octet-stream'
+    });
 
     console.log('Making request to:', saleorApiUrl);
     console.log('Using token:', token ? token.substring(0, 20) + '...' : 'No token');
