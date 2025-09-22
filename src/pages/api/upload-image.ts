@@ -5,19 +5,19 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { saleorApp } from '@/saleor-app';
 
 const FILE_UPLOAD_MUTATION = `
-  mutation FileUpload($file: Upload!) {
-    fileUpload(file: $file) {
-      uploadedFile {
-        url
-        contentType
-      }
-      errors {
-        field
-        message
-        code
-      }
+mutation FileUpload($file: Upload!) {
+  fileUpload(file: $file) {
+    uploadedFile {
+      url
+      contentType
+    }
+    errors {
+      field
+      message
+      code
     }
   }
+}
 `;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -146,18 +146,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const FormData = require('form-data');
     const formData = new FormData();
     
-    // 添加GraphQL操作
-    formData.append('operations', JSON.stringify({
+    const operations = {
       query: FILE_UPLOAD_MUTATION,
       variables: {
         file: null
       }
-    }));
+    };
+    
+    const map = {
+      "0": ["variables.file"]
+    };
+    
+    console.log('GraphQL operations:', JSON.stringify(operations, null, 2));
+    console.log('GraphQL map:', JSON.stringify(map, null, 2));
+    
+    // 添加GraphQL操作
+    formData.append('operations', JSON.stringify(operations));
     
     // 添加文件映射
-    formData.append('map', JSON.stringify({
-      "0": ["variables.file"]
-    }));
+    formData.append('map', JSON.stringify(map));
     
     // 添加文件
     const fileStream = fs.createReadStream(file.filepath);
