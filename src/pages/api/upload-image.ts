@@ -4,21 +4,66 @@ import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { saleorApp } from '@/saleor-app';
 
-const FILE_UPLOAD_MUTATION = `
-mutation FileUpload($file: Upload!) {
-  fileUpload(file: $file) {
-    uploadedFile {
-      url
-      contentType
-    }
-    errors {
-      field
-      message
-      code
+// First check what mutations are available
+const CHECK_SCHEMA_QUERY = `
+query {
+  __schema {
+    mutationType {
+      fields {
+        name
+        description
+      }
     }
   }
-}
-`;
+}`;
+
+// Try different upload mutations
+const FILE_UPLOAD_MUTATIONS = {
+  fileUpload: `
+    mutation FileUpload($file: Upload!) {
+      fileUpload(file: $file) {
+        uploadedFile {
+          url
+          contentType
+        }
+        errors {
+          field
+          message
+          code
+        }
+      }
+    }
+  `,
+  
+  uploadFile: `
+    mutation UploadFile($file: Upload!) {
+      uploadFile(file: $file) {
+        url
+        errors {
+          field
+          message
+          code
+        }
+      }
+    }
+  `,
+  
+  mediaCreate: `
+    mutation MediaCreate($input: MediaInput!) {
+      mediaCreate(input: $input) {
+        media {
+          url
+          type
+        }
+        errors {
+          field
+          message
+          code
+        }
+      }
+    }
+  `
+};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -142,12 +187,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const tokenToUse = authData?.token || receivedToken;
     console.log('Uploading to Saleor via GraphQL...');
 
+    // First, check what mutations are available
+    console.log('Checking available mutations...');
+    const schemaResponse = await fetch(saleorApiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokenToUse}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: CHECK_SCHEMA_QUERY
+      })
+    });
+    
+    if (schemaResponse.ok) {
+      const schemaResult = await schemaResponse.json();
+      console.log('Available mutations:', schemaResult.data?.__schema?.mutationType?.fields?.map((f: any) => f.name).filter((name: string) => name.includes('upload') || name.includes('file') || name.includes('media')));
+    }
+
     // 创建FormData for GraphQL multipart upload
     const FormData = require('form-data');
     const formData = new FormData();
     
     const operations = {
-      query: FILE_UPLOAD_MUTATION,
+      query: FILE_UPLOAD_MUTATIONS.fileUpload,
       variables: {
         file: null
       }
@@ -174,6 +237,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // 发送到Saleor GraphQL
+    console.log('Request headers:', {
+      'Authorization': `Bearer ${tokenToUse}`,
+      ...formData.getHeaders()
+    });
+    
     const uploadResponse = await fetch(saleorApiUrl, {
       method: 'POST',
       headers: {
