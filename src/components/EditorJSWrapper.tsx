@@ -4,22 +4,59 @@ import { useEffect, useRef, useState } from 'react';
 const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const editorRef = useRef<any>(null);
   const [isClient, setIsClient] = useState(false);
+  const [config, setConfig] = useState<any>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [savedContent, setSavedContent] = useState<any>(null);
 
+  // 只运行一次加载配置
   useEffect(() => {
     setIsClient(true);
     
+    // 加载配置
+    const savedConfig = localStorage.getItem('editorConfig');
+    if (savedConfig) {
+      setConfig(JSON.parse(savedConfig));
+    } else {
+      // 默认配置
+      const defaultConfig = {
+        tools: {
+          code: true,
+          checklist: true,
+          warning: true,
+          delimiter: true,
+          nestedList: true,
+          personality: true,
+          raw: true,
+          link: true,
+          attaches: true,
+          button: true,
+          textAlignment: true
+        },
+        theme: 'light',
+        userRole: 'admin',
+        enableAdvancedTools: true
+      };
+      setConfig(defaultConfig);
+      localStorage.setItem('editorConfig', JSON.stringify(defaultConfig));
+    }
+  }, []);
+
+  // 加载保存的内容
+  useEffect(() => {
+    if (!isClient || !productId || !appBridge) {
+      return;
+    }
+
+    let isMounted = true;
+
     const loadSavedContent = async () => {
       try {
-        // 确保 productId 是有效的
-        if (!productId) {
-          console.log('No productId provided');
-          return null;
-        }
-        
         console.log('Loading content for productId:', productId);
         
         // 获取Saleor认证头部
         const { token, saleorApiUrl } = appBridge.getState();
+        console.log('Token available:', !!token);
+        console.log('Saleor API URL:', saleorApiUrl);
         
         const response = await fetch(`/api/update-product?productId=${encodeURIComponent(productId)}`, {
           headers: {
@@ -33,10 +70,26 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         if (data.success && data.product && data.product.description) {
           // 尝试解析描述为 JSON（如果是 EditorJS 格式）
           try {
-            return JSON.parse(data.product.description);
-          } catch {
+            let parsed = JSON.parse(data.product.description);
+            // 清理转义
+            if (parsed.blocks) {
+              parsed.blocks = parsed.blocks.map((block: any) => ({
+                ...block,
+                data: {
+                  ...block.data,
+                  text: block.data.text ? block.data.text.replace(/\\\\/g, '\\').replace(/\\\"/g, '"') : block.data.text
+                }
+              }));
+            }
+            console.log('Cleaned parsed data:', parsed);
+            if (isMounted) {
+              setSavedContent(parsed);
+            }
+            return parsed;
+          } catch (parseError) {
+            console.error('JSON parse error:', parseError);
             // 如果不是 JSON，转换为 EditorJS 格式
-            return {
+            const fallback = {
               blocks: [
                 {
                   type: "paragraph",
@@ -46,139 +99,149 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 }
               ]
             };
+            console.log('Using fallback content:', fallback);
+            if (isMounted) {
+              setSavedContent(fallback);
+            }
+            return fallback;
           }
+        } else {
+          console.log('No content found, using empty');
+          if (isMounted) {
+            setSavedContent({ blocks: [] });
+          }
+          return { blocks: [] };
         }
-        return null;
       } catch (error) {
         console.error('Failed to load content:', error);
-        return null;
+        if (isMounted) {
+          setSavedContent({ blocks: [] });
+        }
+        return { blocks: [] };
       }
     };
-    
+
+    loadSavedContent();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isClient, productId, appBridge]);
+
+  // 初始化编辑器
+  useEffect(() => {
+    if (!isClient || !config || isInitialized || !productId || savedContent === null) {
+      return;
+    }
+
+    let isMounted = true;
+
     const initEditor = async () => {
-      if (typeof window !== 'undefined') {
+      console.log('Starting initEditor');
+      const holderElement = document.getElementById('editorjs');
+      if (!isMounted || typeof window === 'undefined' || !holderElement) {
+        console.log('DOM not ready or unmounted, holder:', !!holderElement);
+        return;
+      }
+
+      try {
+        console.log('Initializing EditorJS with content:', savedContent);
+        console.log('Holder element found:', holderElement);
+
         // @ts-ignore
         const EditorJS = (await import('@editorjs/editorjs')).default;
         // @ts-ignore
         const Header = (await import('@editorjs/header')).default;
         // @ts-ignore
         const List = (await import('@editorjs/list')).default;
-        // @ts-ignore
-        const Image = (await import('@editorjs/image')).default;
-        // @ts-ignore
-        const Table = (await import('@editorjs/table')).default;
-        // @ts-ignore
-        const Quote = (await import('@editorjs/quote')).default;
-        // @ts-ignore
-        const Embed = (await import('@editorjs/embed')).default;
-        // @ts-ignore
-        const Marker = (await import('@editorjs/marker')).default;
-        // @ts-ignore
-        const Underline = (await import('@editorjs/underline')).default;
-        // @ts-ignore
-        const InlineCode = (await import('@editorjs/inline-code')).default;
-        // @ts-ignore
-        const TextVariantTune = (await import('@editorjs/text-variant-tune')).default;
-        // @ts-ignore
-        const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
-        // @ts-ignore
-        const Undo = (await import('editorjs-undo')).default;
 
-        // 加载保存的内容
-        const savedContent = await loadSavedContent();
-        console.log('Loaded content:', savedContent);
+        // 最小工具配置 - 只核心工具避免权限问题
+        const toolsConfig: any = {
+          // @ts-ignore
+          header: {
+            class: Header,
+            inlineToolbar: true,
+            shortcut: 'CMD+SHIFT+H',
+            config: {
+              placeholder: 'Enter a header'
+            }
+          },
+          // @ts-ignore
+          list: {
+            class: List,
+            inlineToolbar: true,
+            shortcut: 'CMD+SHIFT+L'
+          }
+        };
 
+        console.log('Tools config built, keys:', Object.keys(toolsConfig));
+
+        console.log('Creating EditorJS instance with holder:', holderElement);
         // @ts-ignore
         editorRef.current = new EditorJS({
-          holder: 'editorjs',
+          holder: holderElement,
           data: savedContent,
           onReady: () => {
             console.log('EditorJS is ready');
+            console.log('Saved content blocks length:', savedContent?.blocks?.length || 0);
+            console.log('First block:', savedContent?.blocks?.[0]);
+            console.log('Current editor data on ready:', editorRef.current?.saver?.blocks?.blocks);
+            // 手动尝试渲染
+            setTimeout(() => {
+              console.log('Manual render attempt');
+              // @ts-ignore
+              editorRef.current.blocks.render({ blocks: savedContent.blocks });
+              console.log('Manual render completed');
+            }, 100);
+            // 应用主题
+            if (config?.theme === 'dark') {
+              document.documentElement.setAttribute('data-theme', 'dark');
+            } else if (config?.theme === 'light') {
+              document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+              // auto - 跟随系统主题
+              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+              document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
           },
           onChange: () => {
             console.log('Editor content changed');
           },
-          tools: {
-            // @ts-ignore
-            header: Header,
-            // @ts-ignore
-            list: List,
-            // @ts-ignore
-            image: {
-              class: Image,
-              config: {
-                endpoints: {
-                  byFile: '/api/upload-image',
-                  byUrl: '/api/fetch-url',
-                },
-                additionalRequestHeaders: {
-                  'Authorization': `Bearer ${appBridge.getState().token}`,
-                }
-              }
-            },
-            // @ts-ignore
-            table: Table,
-            // @ts-ignore
-            quote: Quote,
-            // @ts-ignore
-            embed: Embed,
-            // @ts-ignore
-            marker: Marker,
-            // @ts-ignore
-            underline: Underline,
-            // @ts-ignore
-            inlineCode: InlineCode,
-            // @ts-ignore
-            Color: {
-              class: ColorPlugin,
-              config: {
-                colorCollections: [
-                  '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
-                  '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
-                  '#EC7878','#9C27B0','#673AB7','#3F51B5',
-                  '#0070FF','#03A9F4','#00BCD4','#4CAF50',
-                  '#8BC34A','#CDDC39','#FFEB3B','#FFC107',
-                  '#FF9800','#FF5722','#795548','#9E9E9E'
-                ],
-                defaultColor: '#000000',
-                type: 'text',
-                customPicker: true
-              }
-            },
-            // @ts-ignore
-            Marker: {
-              class: ColorPlugin,
-              config: {
-                colorCollections: [
-                  '#FFFF00', '#00FF00', '#FF00FF', '#00FFFF',
-                  '#FFA500', '#FFB6C1', '#98FB98', '#87CEEB'
-                ],
-                defaultColor: '#FFFF00',
-                type: 'marker',
-                customPicker: true
-              }
-            },
-          },
-          placeholder: '在这里编写富文本内容...'
+          tools: toolsConfig,
+          placeholder: '在这里编写富文本内容...',
+          readOnly: false
         });
 
-        // @ts-ignore
-        const undo = new Undo({ editor: editorRef.current });
-        // @ts-ignore
-        undo.initialize();
+        console.log('EditorJS instance created successfully');
+
+        if (isMounted) {
+          setIsInitialized(true);
+        }
+      } catch (error) {
+        console.error('Failed to initialize editor:', error);
+        console.error('Error stack:', (error as any).stack);
+        if (isMounted) {
+          setIsInitialized(true);
+        }
       }
     };
 
-    initEditor();
+    // 延迟初始化以确保 DOM 更新
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        initEditor();
+      }, 200);
+    });
 
     return () => {
+      isMounted = false;
       // @ts-ignore
       if (editorRef.current && editorRef.current.destroy) {
         // @ts-ignore
         editorRef.current.destroy();
       }
     };
-  }, []);
+  }, [isClient, config, productId, appBridge, savedContent]);
 
   // @ts-ignore
   const handleSave = async () => {
@@ -277,12 +340,12 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
     }
   };
 
-  if (!isClient) {
+  if (!isClient || !config || !isInitialized || savedContent === null) {
     return <div id="editorjs" style={{ border: '1px solid #ccc', minHeight: '300px' }}>加载中...</div>;
   }
 
   return (
-    <div>
+    <div data-theme={config.theme}>
       <div id="editorjs" style={{ border: '1px solid #ccc', minHeight: '300px' }}></div>
       <button onClick={handleSave} style={{ marginTop: '10px', padding: '10px 20px' }}>
         保存富文本内容
