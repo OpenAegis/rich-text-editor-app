@@ -237,6 +237,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // Clean up temporary file
+    fs.unlinkSync(file.filepath);
+
     // For now, return a placeholder since we need to fix the upload format
     return res.status(400).json({
       success: 0,
@@ -246,66 +249,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         filename: file?.originalFilename,
         size: file?.size,
         authWorking: testResponse.ok
-      }
-    });
-
-    console.log('Saleor upload response status:', uploadResponse.status);
-    console.log('Request details:', {
-      url: saleorApiUrl,
-      hasToken: !!tokenToUse,
-      tokenPrefix: tokenToUse ? tokenToUse.substring(0, 10) + '...' : 'none'
-    });
-    
-    if (!uploadResponse.ok) {
-      const errorText = await uploadResponse.text();
-      console.error('Saleor upload failed:', {
-        status: uploadResponse.status,
-        statusText: uploadResponse.statusText,
-        headers: Object.fromEntries(uploadResponse.headers.entries()),
-        error: errorText
-      });
-      return res.status(uploadResponse.status).json({
-        success: 0,
-        message: `Saleor upload failed: ${uploadResponse.status}`,
-        details: errorText
-      });
-    }
-
-    const result = await uploadResponse.json();
-    console.log('Saleor upload result:', result);
-
-    // 清理临时文件
-    fs.unlinkSync(file.filepath);
-
-    if (result.errors) {
-      console.error('GraphQL errors:', result.errors);
-      return res.status(400).json({ 
-        success: 0, 
-        message: 'File upload failed',
-        errors: result.errors
-      });
-    }
-
-    if (result.data?.fileUpload?.errors && result.data.fileUpload.errors.length > 0) {
-      return res.status(400).json({ 
-        success: 0, 
-        message: 'File upload failed',
-        errors: result.data.fileUpload.errors
-      });
-    }
-
-    if (!result.data?.fileUpload?.uploadedFile?.url) {
-      return res.status(400).json({ 
-        success: 0, 
-        message: 'Upload succeeded but no URL returned'
-      });
-    }
-
-    // 返回EditorJS期望的格式
-    res.status(200).json({
-      success: 1,
-      file: {
-        url: result.data.fileUpload.uploadedFile.url
       }
     });
 
