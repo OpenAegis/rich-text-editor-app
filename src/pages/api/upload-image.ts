@@ -101,36 +101,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 构建 multipart/form-data
     const formData = new FormData();
-    formData.append('operations', JSON.stringify({
-      query: `
-        mutation($file: Upload!) {
-          fileUpload(file: $file) {
-            uploadedFile { url contentType }
-            errors { field message code }
-          }
-        }
-      `,
+    
+    const operations = {
+      query: "mutation($file: Upload!) { fileUpload(file: $file) { uploadedFile { url contentType } errors { field message code } } }",
       variables: { file: null },
-    }));
-    formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
-    // 直接传递文件流，不指定文件名
+    };
+    
+    const map = { '0': ['variables.file'] };
+    
+    console.log('Operations to send:', JSON.stringify(operations));
+    console.log('Map to send:', JSON.stringify(map));
+    
+    formData.append('operations', JSON.stringify(operations));
+    formData.append('map', JSON.stringify(map));
     formData.append('0', fs.createReadStream(file.filepath));
 
-    console.log('Making request to:', saleorApiUrl); // 调试日志
+    console.log('Making request to:', saleorApiUrl);
     console.log('Using token:', token ? token.substring(0, 20) + '...' : 'No token');
     console.log('File path:', file.filepath);
     console.log('File exists:', fs.existsSync(file.filepath));
 
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      ...formData.getHeaders()               // 自动添加 Content-Type 等头
+    };
+    
+    console.log('Request headers:', headers);
+    
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...formData.getHeaders()               // 自动添加 Content-Type 等头
-      },
+      headers,
       body: formData as any
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    
     const result = await response.json();
+    console.log('Full response:', JSON.stringify(result, null, 2));
     if (result.data?.fileUpload?.uploadedFile) {
       return res.status(200).json({
         success: 1,
