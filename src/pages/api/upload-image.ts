@@ -125,30 +125,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: 0, message: 'File does not exist' });
     }
 
-    // 直接读取文件内容而不是使用流
-    const fileBuffer = fs.readFileSync(file.filepath);
+    // 按照官方示例重新构建 FormData
+    const fd = new FormData();
     
-    // 构建 multipart/form-data
-    const formData = new FormData();
+    const operations = {
+      query: `
+        mutation($file: Upload!) {
+          fileUpload(file: $file) {
+            uploadedFile { url contentType }
+            errors { field message code }
+          }
+        }
+      `,
+      variables: { file: null }
+    };
     
-    const operations = JSON.stringify({
-      query: "mutation($file: Upload!) { fileUpload(file: $file) { uploadedFile { url contentType } errors { field message code } } }",
-      variables: { file: null },
-    });
+    console.log('Operations to send:', JSON.stringify(operations));
     
-    const map = JSON.stringify({ '0': ['variables.file'] });
+    // 按照示例的顺序添加字段
+    fd.append('operations', JSON.stringify(operations));             // 必含 query
+    fd.append('map', JSON.stringify({ '0': ['variables.file'] }));   // 必含 map
+    fd.append('0', fs.createReadStream(file.filepath), file.originalFilename || 'upload.bin');
     
-    console.log('Operations to send:', operations);
-    console.log('Map to send:', map);
-    console.log('File size:', fileBuffer.length);
-    console.log('File mimetype:', file.mimetype);
-    
-    formData.append('operations', operations);
-    formData.append('map', map);
-    formData.append('0', fileBuffer, {
-      filename: file.originalFilename || 'upload.bin',
-      contentType: file.mimetype || 'application/octet-stream'
-    });
+    console.log('FormData created with operations, map, and file');
 
     console.log('Making request to:', saleorApiUrl);
     console.log('Using token:', token ? token.substring(0, 20) + '...' : 'No token');
@@ -157,7 +156,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const headers = {
       Authorization: `Bearer ${token}`,
-      ...formData.getHeaders()               // 自动添加 Content-Type 等头
+      ...fd.getHeaders()                                         // 自动添加 Content-Type 边界
     };
     
     console.log('Request headers:', headers);
@@ -189,7 +188,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
       headers,
-      body: formData as any
+      body: fd as any
     });
 
     console.log('Response status:', response.status);
