@@ -82,6 +82,12 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         // @ts-ignore
         const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
         // @ts-ignore
+        const FontSize = (await import('editorjs-inline-font-size-tool')).default;
+        // @ts-ignore
+        const AlignmentTune = (await import('editorjs-text-alignment-blocktune')).default;
+        // @ts-ignore
+        const StyleInline = (await import('editorjs-style')).default;
+        // @ts-ignore
         const Undo = (await import('editorjs-undo')).default;
 
         // 加载保存的内容
@@ -100,9 +106,23 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           },
           tools: {
             // @ts-ignore
-            header: Header,
+            header: {
+              class: Header,
+              config: {
+                levels: [1, 2, 3, 4, 5, 6],
+                defaultLevel: 2
+              },
+              tunes: ['alignmentTune']
+            },
             // @ts-ignore
-            list: List,
+            paragraph: {
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            list: {
+              class: List,
+              tunes: ['alignmentTune']
+            },
             // @ts-ignore
             image: {
               class: Image,
@@ -111,14 +131,24 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                   byFile: '/api/upload-image',
                   byUrl: '/api/fetch-url',
                 }
-              }
+              },
+              tunes: ['alignmentTune']
             },
             // @ts-ignore
-            table: Table,
+            table: {
+              class: Table,
+              tunes: ['alignmentTune']
+            },
             // @ts-ignore
-            quote: Quote,
+            quote: {
+              class: Quote,
+              tunes: ['alignmentTune']
+            },
             // @ts-ignore
-            embed: Embed,
+            embed: {
+              class: Embed,
+              tunes: ['alignmentTune']
+            },
             // @ts-ignore
             marker: Marker,
             // @ts-ignore
@@ -126,10 +156,15 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             // @ts-ignore
             inlineCode: InlineCode,
             // @ts-ignore
-            textVariant: {
-              class: TextVariantTune,
+            fontSize: FontSize,
+            // @ts-ignore
+            style: {
+              class: StyleInline,
               config: {
-                default: 'call-out'
+                'font-weight': 'bold',
+                'font-style': 'italic',
+                'text-decoration': 'underline',
+                'font-family': 'serif'
               }
             },
             // @ts-ignore
@@ -137,10 +172,14 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               class: ColorPlugin,
               config: {
                 colorCollections: [
+                  '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
+                  '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
                   '#EC7878','#9C27B0','#673AB7','#3F51B5',
-                  '#0070FF','#03A9F4','#00BCD4','#4CAF50'
+                  '#0070FF','#03A9F4','#00BCD4','#4CAF50',
+                  '#8BC34A','#CDDC39','#FFEB3B','#FFC107',
+                  '#FF9800','#FF5722','#795548','#9E9E9E'
                 ],
-                defaultColor: '#FF1300',
+                defaultColor: '#000000',
                 type: 'text',
                 customPicker: true
               }
@@ -149,10 +188,18 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             Marker: {
               class: ColorPlugin,
               config: {
-                defaultColor: '#FFBF00',
-                type: 'marker'
+                colorCollections: [
+                  '#FFFF00', '#00FF00', '#FF00FF', '#00FFFF',
+                  '#FFA500', '#FFB6C1', '#98FB98', '#87CEEB'
+                ],
+                defaultColor: '#FFFF00',
+                type: 'marker',
+                customPicker: true
               }
             }
+          },
+          tunes: {
+            alignmentTune: AlignmentTune
           },
           placeholder: '在这里编写富文本内容...'
         });

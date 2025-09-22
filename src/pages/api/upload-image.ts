@@ -33,18 +33,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // 读取文件内容
-    const fileBuffer = fs.readFileSync(file.filepath);
-    const base64Data = fileBuffer.toString('base64');
-    const dataUrl = `data:${file.mimetype};base64,${base64Data}`;
-
+    // 生成唯一文件名
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2);
+    const ext = file.originalFilename?.split('.').pop() || 'jpg';
+    const filename = `${timestamp}_${random}.${ext}`;
+    
+    // 创建uploads目录（如果不存在）
+    const uploadsDir = './public/uploads';
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    // 移动文件到uploads目录
+    const newPath = `${uploadsDir}/${filename}`;
+    fs.copyFileSync(file.filepath, newPath);
+    
     // 清理临时文件
     fs.unlinkSync(file.filepath);
+    
+    // 返回可访问的URL
+    const fileUrl = `/uploads/${filename}`;
     
     res.status(200).json({
       success: 1,
       file: {
-        url: dataUrl
+        url: fileUrl
       }
     });
   } catch (error) {

@@ -172,6 +172,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
         }
         
+        // 测试带token的简单认证请求
+        console.log('Testing authenticated request...');
+        try {
+          const authTestResponse = await fetch(saleorApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${tokenToUse}`,
+            },
+            body: JSON.stringify({
+              query: 'query { me { email } }'
+            })
+          });
+          console.log('Auth test response status:', authTestResponse.status);
+          if (authTestResponse.status === 502) {
+            return res.status(502).json({
+              success: false,
+              message: 'Token authentication failed with 502 error',
+              token: tokenToUse.substring(0, 20) + '...'
+            });
+          }
+        } catch (authTestError) {
+          console.error('Auth test failed:', authTestError);
+        }
+        
         const response = await fetch(saleorApiUrl, {
           method: 'POST',
           headers: {
