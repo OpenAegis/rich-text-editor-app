@@ -65,13 +65,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     // 从数据库获取配置
+    console.log('Querying database with key:', saleorApiUrl);
     const config = await getConfigFromDatabase(saleorApiUrl);
+    console.log('Database config result:', config ? 'Found' : 'Not found');
     
     if (!config) {
       return res.status(500).json({ success: 0, message: 'No configuration found in database' });
     }
     
+    console.log('Config keys:', Object.keys(config));
     const { token } = config;
+    console.log('Token from database:', token ? token.substring(0, 20) + '...' : 'No token');
     
     const { files } = await parseForm(req);
     console.log('Parsed files:', files); // 调试日志
@@ -127,6 +131,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
     
     console.log('Request headers:', headers);
+    
+    // 先测试一个简单的GraphQL查询来验证认证
+    console.log('Testing simple GraphQL query first...');
+    try {
+      const testResponse = await fetch(saleorApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: 'query { me { email } }'
+        })
+      });
+      const testResult = await testResponse.json();
+      console.log('Test query result:', testResult);
+      
+      if (testResult.errors) {
+        console.error('Authentication test failed:', testResult.errors);
+        return res.status(401).json({ success: 0, message: 'Authentication failed', errors: testResult.errors });
+      }
+    } catch (testError) {
+      console.error('Test query error:', testError);
+    }
     
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
