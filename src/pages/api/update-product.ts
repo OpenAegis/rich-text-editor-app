@@ -28,6 +28,7 @@ const GET_PRODUCT_QUERY = `
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    console.log('=== UPDATE PRODUCT API VERSION 2.0 ===');
     console.log('Update product API called, method:', req.method);
     console.log('Request query:', req.query);
     console.log('Request body:', req.body);
