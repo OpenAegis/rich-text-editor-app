@@ -135,14 +135,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         console.log('Sending GraphQL request to:', saleorApiUrl);
-        console.log('Using token:', receivedToken ? receivedToken.substring(0, 20) + '...' : 'No token');
+        console.log('Using JWT token:', receivedToken ? receivedToken.substring(0, 20) + '...' : 'No token');
+        console.log('Using app token:', authData?.token ? authData.token.substring(0, 20) + '...' : 'No app token');
         console.log('Request variables:', { id: productId, description: description.substring(0, 100) + '...' });
+        
+        // 对于Saleor Dashboard应用，尝试使用存储的app token而不是JWT token
+        // 因为502错误可能是因为JWT token无法访问GraphQL API
+        const tokenToUse = authData?.token || receivedToken;
+        console.log('Final token to use:', tokenToUse ? tokenToUse.substring(0, 20) + '...' : 'No token');
         
         const response = await fetch(saleorApiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${receivedToken}`,
+            'Authorization': `Bearer ${tokenToUse}`,
           },
           body: JSON.stringify({
             query: UPDATE_PRODUCT_MUTATION,
