@@ -144,6 +144,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const tokenToUse = authData?.token || receivedToken;
         console.log('Final token to use:', tokenToUse ? tokenToUse.substring(0, 20) + '...' : 'No token');
         
+        // 先做一个简单的连接测试
+        console.log('Testing connection to Saleor API...');
+        try {
+          const testResponse = await fetch(saleorApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: 'query { __typename }'
+            })
+          });
+          console.log('Test response status:', testResponse.status);
+          const testResult = await testResponse.text();
+          console.log('Test response:', testResult.substring(0, 200));
+        } catch (testError) {
+          console.error('Connection test failed:', testError);
+          return res.status(500).json({
+            success: false,
+            message: 'Cannot connect to Saleor API',
+            error: testError instanceof Error ? testError.message : String(testError)
+          });
+        }
+        
         const response = await fetch(saleorApiUrl, {
           method: 'POST',
           headers: {
