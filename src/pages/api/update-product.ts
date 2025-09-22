@@ -120,9 +120,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Using Saleor URL:', saleorApiUrl);
     console.log('Authentication verified successfully');
+    console.log('AuthData available:', !!authData);
+    console.log('ReceivedToken available:', !!receivedToken);
 
     if (req.method === 'POST') {
       // 更新商品描述
+      console.log('=== Starting POST request handling ===');
       try {
         const { productId, description } = req.body;
         console.log('POST request - Product ID:', productId, 'Description length:', description?.length);
