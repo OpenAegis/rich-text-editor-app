@@ -273,16 +273,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Clean up temporary file
     fs.unlinkSync(file.filepath);
     
-    if (!uploadResponse.ok) {
-      const errorText = await uploadResponse.text();
-      console.error('Upload failed:', errorText);
-      return res.status(uploadResponse.status).json({
-        success: 0,
-        message: `Upload failed: ${uploadResponse.status}`,
-        details: errorText
-      });
-    }
-    
     // Return success response in EditorJS format
     return res.status(200).json({
       success: 1,
