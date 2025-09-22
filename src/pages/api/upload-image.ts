@@ -21,7 +21,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { files } = await parseForm(req);
-    const file = Array.isArray(files.file) ? files.file[0] : files.file;
+    // 首先尝试获取 file 字段，如果不存在则尝试获取 image 字段
+    const file = files.file 
+      ? (Array.isArray(files.file) ? files.file[0] : files.file)
+      : (files.image ? (Array.isArray(files.image) ? files.image[0] : files.image) : null);
+      
     if (!file) {
       return res.status(400).json({ success: 0, message: 'No file uploaded' });
     }
