@@ -237,18 +237,109 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // Now implement the proper file upload
+    console.log('Implementing file upload with proper multipart format...');
+    
+    // Create proper multipart form data for GraphQL file upload
+    const FormData = require('form-data');
+    const formData = new FormData();
+    
+    // Use a basic file upload mutation that should work with most Saleor versions
+    const uploadMutation = `
+      mutation FileUpload($file: Upload!) {
+        fileUpload(file: $file) {
+          uploadedFile {
+            url
+            contentType
+          }
+          errors {
+            field
+            message
+            code
+          }
+        }
+      }
+    `;
+    
+    // Create the operations object
+    const operations = {
+      query: uploadMutation,
+      variables: { file: null }
+    };
+    
+    // Create the map object
+    const map = { "0": ["variables.file"] };
+    
+    // Add the form data fields in the correct order
+    formData.append('operations', JSON.stringify(operations));
+    formData.append('map', JSON.stringify(map));
+    
+    // Add the file with proper metadata
+    const fileStream = fs.createReadStream(file.filepath);
+    formData.append('0', fileStream, {
+      filename: file.originalFilename || 'upload.png',
+      contentType: file.mimetype || 'image/png'
+    });
+    
+    console.log('Sending multipart upload request...');
+    
+    const uploadResponse = await fetch(saleorApiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokenToUse}`,
+        ...formData.getHeaders()
+      },
+      body: formData
+    });
+    
+    console.log('Upload response status:', uploadResponse.status);
+    
     // Clean up temporary file
     fs.unlinkSync(file.filepath);
-
-    // For now, return a placeholder since we need to fix the upload format
-    return res.status(400).json({
-      success: 0,
-      message: 'File upload not yet properly configured - working on multipart format fix',
-      debug: {
-        fileReceived: !!file,
-        filename: file?.originalFilename,
-        size: file?.size,
-        authWorking: testResponse.ok
+    
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error('Upload failed:', errorText);
+      return res.status(uploadResponse.status).json({
+        success: 0,
+        message: `Upload failed: ${uploadResponse.status}`,
+        details: errorText
+      });
+    }
+    
+    const result = await uploadResponse.json();
+    console.log('Upload result:', result);
+    
+    if (result.errors) {
+      console.error('GraphQL errors:', result.errors);
+      return res.status(400).json({
+        success: 0,
+        message: 'GraphQL errors occurred',
+        errors: result.errors
+      });
+    }
+    
+    if (result.data?.fileUpload?.errors && result.data.fileUpload.errors.length > 0) {
+      return res.status(400).json({
+        success: 0,
+        message: 'File upload errors',
+        errors: result.data.fileUpload.errors
+      });
+    }
+    
+    if (!result.data?.fileUpload?.uploadedFile?.url) {
+      return res.status(400).json({
+        success: 0,
+        message: 'Upload completed but no URL returned',
+        data: result.data
+      });
+    }
+    
+    // Return success response in EditorJS format
+    return res.status(200).json({
+      success: 1,
+      file: {
+        url: result.data.fileUpload.uploadedFile.url
       }
     });
 
