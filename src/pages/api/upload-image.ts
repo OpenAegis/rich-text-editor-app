@@ -2,7 +2,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
 import fs from 'fs';
-import FormData from 'form-data';               // 使用社区版 FormData
+import { FormData } from 'formdata-node';                 // WHATWG FormData
+import { FormDataEncoder } from 'form-data-encoder';      // 将 FormData 转为可读流
 import { saleorApp } from '@/saleor-app';
 
 // 数据库配置接口
@@ -125,14 +126,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: 0, message: 'File does not exist' });
     }
 
-    // 按照最简示例重新构建 FormData
+    // 构造 WHATWG FormData
     const form = new FormData();
-    
-    // 1. 读取文件流
-    const fileStream = fs.createReadStream(file.filepath);
-    
-    // 2. 构造 multipart/form-data
-    form.append(
+    form.set(
       'operations',
       JSON.stringify({
         query: `
@@ -145,23 +141,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         `,
         variables: { file: null },
       })
-    );
-    form.append('map', JSON.stringify({ '0': ['variables.file'] }));
-    form.append('0', fileStream);
+    ); // 必含完整 query
+    form.set('map', JSON.stringify({ '0': ['variables.file'] })); // 必含 map
+    form.set('0', fs.createReadStream(file.filepath), file.originalFilename || 'upload.bin');
     
-    console.log('FormData created exactly like the minimal example');
+    console.log('WHATWG FormData created with proper encoding');
 
     console.log('Making request to:', saleorApiUrl);
     console.log('Using token:', token ? token.substring(0, 20) + '...' : 'No token');
     console.log('File path:', file.filepath);
     console.log('File exists:', fs.existsSync(file.filepath));
 
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      ...form.getHeaders(),                                      // 自动添加 Content-Type 边界
-    };
+    // 用 FormDataEncoder 编码并发请求
+    const encoder = new FormDataEncoder(form);
     
-    console.log('Request headers:', headers);
+    console.log('Encoder headers:', encoder.headers);
     
     // 先测试一个简单的GraphQL查询来验证认证
     console.log('Testing simple GraphQL query first...');
@@ -189,8 +183,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
-      headers,
-      body: form as any,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...encoder.headers,          // 自动注入正确 Content-Type
+      },
+      body: encoder.encode(),        // WHATWG 可读流
     });
 
     console.log('Response status:', response.status);
