@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
 import fs from 'fs';
 import FormData from 'form-data';               // 使用社区版 FormData
-import { Redis } from '@upstash/redis';
+import { saleorApp } from '@/saleor-app';
 
 // 数据库配置接口
 interface DatabaseConfig {
@@ -13,19 +13,14 @@ interface DatabaseConfig {
   jwks: string;
 }
 
-// 从Upstash Redis获取配置
+// 从数据库获取配置
 async function getConfigFromDatabase(): Promise<DatabaseConfig | null> {
   try {
-    const redis = new Redis({
-      url: process.env.UPSTASH_URL!,
-      token: process.env.UPSTASH_TOKEN!,
-    });
-    
-    // 获取配置数据，假设存储在key 'saleor_config' 下
-    const config = await redis.get('saleor_config') as DatabaseConfig;
+    // 使用现有的 APL 实例直接获取配置数据
+    const config = await saleorApp.apl.get('saleor_config') as DatabaseConfig;
     return config;
   } catch (error) {
-    console.error('Failed to get config from Upstash:', error);
+    console.error('Failed to get config from database:', error);
     return null;
   }
 }
