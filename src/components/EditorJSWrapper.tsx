@@ -126,23 +126,9 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           },
           tools: {
             // @ts-ignore
-            header: {
-              class: Header,
-              config: {
-                levels: [1, 2, 3, 4, 5, 6],
-                defaultLevel: 2
-              },
-              tunes: ['alignmentTune']
-            },
+            header: Header,
             // @ts-ignore
-            paragraph: {
-              tunes: ['alignmentTune']
-            },
-            // @ts-ignore
-            list: {
-              class: List,
-              tunes: ['alignmentTune']
-            },
+            list: List,
             // @ts-ignore
             image: {
               class: Image,
@@ -151,24 +137,14 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                   byFile: '/api/upload-image',
                   byUrl: '/api/fetch-url',
                 }
-              },
-              tunes: ['alignmentTune']
+              }
             },
             // @ts-ignore
-            table: {
-              class: Table,
-              tunes: ['alignmentTune']
-            },
+            table: Table,
             // @ts-ignore
-            quote: {
-              class: Quote,
-              tunes: ['alignmentTune']
-            },
+            quote: Quote,
             // @ts-ignore
-            embed: {
-              class: Embed,
-              tunes: ['alignmentTune']
-            },
+            embed: Embed,
             // @ts-ignore
             marker: Marker,
             // @ts-ignore
@@ -206,96 +182,44 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               }
             },
             // @ts-ignore
-            code: {
-              class: Code,
-              config: {
-                placeholder: '输入代码...'
-              },
-              tunes: ['alignmentTune']
-            },
+            code: Code,
             // @ts-ignore
-            raw: {
-              class: RawTool,
-              tunes: ['alignmentTune']
-            },
+            raw: RawTool,
             // @ts-ignore
             delimiter: Delimiter,
             // @ts-ignore
-            warning: {
-              class: Warning,
-              config: {
-                titlePlaceholder: '警告标题',
-                messagePlaceholder: '警告内容'
-              },
-              tunes: ['alignmentTune']
-            },
+            warning: Warning,
             // @ts-ignore
-            checklist: {
-              class: Checklist,
-              tunes: ['alignmentTune']
-            },
+            checklist: Checklist,
             // @ts-ignore
-            nestedlist: {
-              class: NestedList,
-              config: {
-                defaultStyle: 'unordered'
-              },
-              tunes: ['alignmentTune']
-            },
+            nestedlist: NestedList,
             // @ts-ignore
             attaches: {
               class: AttachesTool,
               config: {
                 endpoint: '/api/upload-image'
-              },
-              tunes: ['alignmentTune']
+              }
             },
             // @ts-ignore
             linkTool: {
               class: LinkTool,
               config: {
                 endpoint: '/api/fetch-url'
-              },
-              tunes: ['alignmentTune']
+              }
             },
             // @ts-ignore
             personality: {
               class: Personality,
               config: {
                 endpoint: '/api/fetch-url'
-              },
-              tunes: ['alignmentTune']
+              }
             },
             // @ts-ignore
-            button: {
-              class: Button,
-              config: {
-                css: {
-                  btnColor: "btn--gray",
-                }
-              },
-              tunes: ['alignmentTune']
-            },
+            button: Button,
             // @ts-ignore
-            alert: {
-              class: Alert,
-              config: {
-                alertTypes: ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'light', 'dark'],
-                defaultType: 'primary',
-                messagePlaceholder: '输入提示信息...',
-              },
-              tunes: ['alignmentTune']
-            },
+            alert: Alert,
             // @ts-ignore
-            codeBox: {
-              class: CodeBox,
-              config: {
-                themeURL: 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/styles/dracula.min.css',
-                themeName: 'atom-one-dark',
-                useDefaultTheme: 'light'
-              },
-              tunes: ['alignmentTune']
-            },
+            codeBox: CodeBox,
           },
           tunes: {
             alignmentTune: AlignmentTune
