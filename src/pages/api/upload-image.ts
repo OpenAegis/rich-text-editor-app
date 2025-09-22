@@ -237,20 +237,67 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Now implement the proper file upload
-    console.log('Implementing file upload with proper multipart format...');
+    // Since fileUpload mutation doesn't seem to exist, let's try using a base64 approach
+    // or find an alternative upload method
+    console.log('Trying alternative upload approach...');
     
-    // Create proper multipart form data for GraphQL file upload
-    const FormData = require('form-data');
-    const formData = new FormData();
+    // Convert file to base64
+    const fileBuffer = fs.readFileSync(file.filepath);
+    const base64Data = fileBuffer.toString('base64');
+    const dataUrl = `data:${file.mimetype};base64,${base64Data}`;
     
-    // Use a basic file upload mutation that should work with most Saleor versions
+    // First, get any existing product to use for media upload
+    const productsQuery = `
+      query GetProducts {
+        products(first: 1) {
+          edges {
+            node {
+              id
+              name
+            }
+          }
+        }
+      }
+    `;
+    
+    const productsResponse = await fetch(saleorApiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokenToUse}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: productsQuery
+      })
+    });
+    
+    let productId = null;
+    if (productsResponse.ok) {
+      const productsResult = await productsResponse.json();
+      console.log('Products query result:', productsResult);
+      productId = productsResult.data?.products?.edges?.[0]?.node?.id;
+    }
+    
+    if (!productId) {
+      // Clean up temporary file
+      fs.unlinkSync(file.filepath);
+      return res.status(400).json({
+        success: 0,
+        message: 'No products found to attach media to. Please create a product first or use a different upload method.',
+        suggestion: 'Consider implementing a dedicated file upload endpoint in your Saleor backend.'
+      });
+    }
+    
+    console.log('Using product ID for upload:', productId);
+    
+    // Try using productMediaCreate as an alternative (this usually exists in Saleor)
     const uploadMutation = `
-      mutation FileUpload($file: Upload!) {
-        fileUpload(file: $file) {
-          uploadedFile {
+      mutation CreateMedia($input: ProductMediaCreateInput!) {
+        productMediaCreate(input: $input) {
+          media {
+            id
             url
-            contentType
+            type
           }
           errors {
             field
@@ -261,35 +308,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     `;
     
-    // Create the operations object
-    const operations = {
-      query: uploadMutation,
-      variables: { file: null }
-    };
-    
-    // Create the map object
-    const map = { "0": ["variables.file"] };
-    
-    // Add the form data fields in the correct order
-    formData.append('operations', JSON.stringify(operations));
-    formData.append('map', JSON.stringify(map));
-    
-    // Add the file with proper metadata
-    const fileStream = fs.createReadStream(file.filepath);
-    formData.append('0', fileStream, {
-      filename: file.originalFilename || 'upload.png',
-      contentType: file.mimetype || 'image/png'
-    });
-    
-    console.log('Sending multipart upload request...');
-    
     const uploadResponse = await fetch(saleorApiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${tokenToUse}`,
-        ...formData.getHeaders()
+        'Content-Type': 'application/json'
       },
-      body: formData
+      body: JSON.stringify({
+        query: uploadMutation,
+        variables: {
+          input: {
+            product: productId,
+            image: dataUrl,
+            alt: file.originalFilename || 'Uploaded image'
+          }
+        }
+      })
     });
     
     console.log('Upload response status:', uploadResponse.status);
@@ -319,15 +353,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
     
-    if (result.data?.fileUpload?.errors && result.data.fileUpload.errors.length > 0) {
+    if (result.data?.productMediaCreate?.errors && result.data.productMediaCreate.errors.length > 0) {
       return res.status(400).json({
         success: 0,
-        message: 'File upload errors',
-        errors: result.data.fileUpload.errors
+        message: 'Media upload errors',
+        errors: result.data.productMediaCreate.errors
       });
     }
     
-    if (!result.data?.fileUpload?.uploadedFile?.url) {
+    if (!result.data?.productMediaCreate?.media?.url) {
       return res.status(400).json({
         success: 0,
         message: 'Upload completed but no URL returned',
@@ -339,7 +373,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       success: 1,
       file: {
-        url: result.data.fileUpload.uploadedFile.url
+        url: result.data.productMediaCreate.media.url
       }
     });
 
