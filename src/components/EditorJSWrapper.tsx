@@ -110,6 +110,9 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 endpoints: {
                   byFile: '/api/upload-image',
                   byUrl: '/api/fetch-url',
+                },
+                additionalRequestHeaders: {
+                  'Authorization': `Bearer ${appBridge.getState().token}`,
                 }
               }
             },

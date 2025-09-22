@@ -14,10 +14,10 @@ interface DatabaseConfig {
 }
 
 // 从数据库获取配置
-async function getConfigFromDatabase(): Promise<DatabaseConfig | null> {
+async function getConfigFromDatabase(key: string): Promise<DatabaseConfig | null> {
   try {
-    // 使用现有的 APL 实例直接获取配置数据
-    const config = await saleorApp.apl.get('saleor_config') as DatabaseConfig;
+    // 使用传入的key从数据库获取配置
+    const config = await saleorApp.apl.get(key) as DatabaseConfig;
     return config;
   } catch (error) {
     console.error('Failed to get config from database:', error);
@@ -41,14 +41,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // 获取Authorization头部
+    const authorizationHeader = req.headers['authorization'] as string;
+    
+    if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: 0, message: 'Authorization header is required' });
+    }
+    
+    // 提取JWT token
+    const jwtToken = authorizationHeader.replace('Bearer ', '');
+    
+    // 解析JWT token获取saleorApiUrl (从iss字段)
+    let saleorApiUrl: string;
+    try {
+      const payload = JSON.parse(Buffer.from(jwtToken.split('.')[1], 'base64').toString());
+      saleorApiUrl = payload.iss;
+      
+      if (!saleorApiUrl) {
+        return res.status(400).json({ success: 0, message: 'Invalid JWT token: missing issuer' });
+      }
+    } catch (error) {
+      return res.status(400).json({ success: 0, message: 'Invalid JWT token format' });
+    }
+    
     // 从数据库获取配置
-    const config = await getConfigFromDatabase();
+    const config = await getConfigFromDatabase(saleorApiUrl);
     
     if (!config) {
       return res.status(500).json({ success: 0, message: 'No configuration found in database' });
     }
     
-    const { saleorApiUrl, token } = config;
+    const { token } = config;
     
     const { files } = await parseForm(req);
     console.log('Parsed files:', files); // 调试日志
