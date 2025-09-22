@@ -21,13 +21,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { files } = await parseForm(req);
+    console.log('Parsed files:', files); // 调试日志
+    
     // 首先尝试获取 file 字段，如果不存在则尝试获取 image 字段
     const file = files.file 
       ? (Array.isArray(files.file) ? files.file[0] : files.file)
       : (files.image ? (Array.isArray(files.image) ? files.image[0] : files.image) : null);
       
+    console.log('Selected file:', file); // 调试日志
+      
     if (!file) {
       return res.status(400).json({ success: 0, message: 'No file uploaded' });
+    }
+
+    // 检查文件路径是否存在
+    if (!file.filepath) {
+      console.error('File path is missing:', file); // 调试日志
+      return res.status(400).json({ success: 0, message: 'File path is missing' });
+    }
+
+    // 检查文件是否存在
+    if (!fs.existsSync(file.filepath)) {
+      console.error('File does not exist:', file.filepath); // 调试日志
+      return res.status(400).json({ success: 0, message: 'File does not exist' });
     }
 
     // 构建 multipart/form-data
