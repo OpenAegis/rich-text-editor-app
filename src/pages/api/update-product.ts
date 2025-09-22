@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+
 import { saleorApp } from '@/saleor-app';
 
 const UPDATE_PRODUCT_MUTATION = `

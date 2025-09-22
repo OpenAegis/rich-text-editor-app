@@ -1,9 +1,9 @@
 import { actions, useAppBridge } from "@saleor/app-sdk/app-bridge";
 import { Box, Button, Input, Text } from "@saleor/macaw-ui";
 import { NextPage } from "next";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { MouseEventHandler, useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 
 // 动态导入应用管理组件
 const AppManagement = dynamic(() => import('../components/AppManagement'), { ssr: false });

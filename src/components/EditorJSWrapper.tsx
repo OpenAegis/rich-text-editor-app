@@ -82,33 +82,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         // @ts-ignore
         const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
         // @ts-ignore
-        const AlignmentTune = (await import('editorjs-text-alignment-blocktune')).default;
-        // @ts-ignore
         const Undo = (await import('editorjs-undo')).default;
-        // @ts-ignore
-        const Code = (await import('@editorjs/code')).default;
-        // @ts-ignore
-        const RawTool = (await import('@editorjs/raw')).default;
-        // @ts-ignore
-        const Delimiter = (await import('@editorjs/delimiter')).default;
-        // @ts-ignore
-        const Warning = (await import('@editorjs/warning')).default;
-        // @ts-ignore
-        const Checklist = (await import('@editorjs/checklist')).default;
-        // @ts-ignore
-        const NestedList = (await import('@editorjs/nested-list')).default;
-        // @ts-ignore
-        const AttachesTool = (await import('@editorjs/attaches')).default;
-        // @ts-ignore
-        const LinkTool = (await import('@editorjs/link')).default;
-        // @ts-ignore
-        const Personality = (await import('@editorjs/personality')).default;
-        // @ts-ignore
-        const Button = (await import('editorjs-button')).default;
-        // @ts-ignore
-        const Alert = (await import('editorjs-alert')).default;
-        // @ts-ignore
-        const CodeBox = (await import('@bomdi/codebox')).default;
 
         // 加载保存的内容
         const savedContent = await loadSavedContent();
@@ -181,48 +155,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 customPicker: true
               }
             },
-            // @ts-ignore
-            code: Code,
-            // @ts-ignore
-            raw: RawTool,
-            // @ts-ignore
-            delimiter: Delimiter,
-            // @ts-ignore
-            warning: Warning,
-            // @ts-ignore
-            checklist: Checklist,
-            // @ts-ignore
-            nestedlist: NestedList,
-            // @ts-ignore
-            attaches: {
-              class: AttachesTool,
-              config: {
-                endpoint: '/api/upload-image'
-              }
-            },
-            // @ts-ignore
-            linkTool: {
-              class: LinkTool,
-              config: {
-                endpoint: '/api/fetch-url'
-              }
-            },
-            // @ts-ignore
-            personality: {
-              class: Personality,
-              config: {
-                endpoint: '/api/fetch-url'
-              }
-            },
-            // @ts-ignore
-            button: Button,
-            // @ts-ignore
-            alert: Alert,
-            // @ts-ignore
-            codeBox: CodeBox,
-          },
-          tunes: {
-            alignmentTune: AlignmentTune
           },
           placeholder: '在这里编写富文本内容...'
         });

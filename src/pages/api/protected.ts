@@ -1,4 +1,5 @@
 import { createProtectedHandler } from "@saleor/app-sdk/handlers/next";
+
 import { apl } from "@/saleor-app";
 
 /**

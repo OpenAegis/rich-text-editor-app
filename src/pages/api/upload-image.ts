@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 // @ts-ignore
 import formidable from 'formidable';
 import fs from 'fs';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {

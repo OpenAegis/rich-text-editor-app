@@ -1,9 +1,9 @@
 // @ts-ignore
-import { useEffect, useState } from 'react';
 // @ts-ignore
 import { useAppBridge } from '@saleor/app-sdk/app-bridge';
 // @ts-ignore
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 
 // 动态导入EditorJSWrapper组件以避免SSR问题
 // @ts-ignore
