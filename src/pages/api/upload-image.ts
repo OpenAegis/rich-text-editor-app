@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
 import fs from 'fs';
+import FormData from 'form-data';               // 使用社区版 FormData
 
 export const config = { api: { bodyParser: false } };
 
@@ -25,32 +26,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: 0, message: 'No file uploaded' });
     }
 
-    // 构造 GraphQL multipart 请求体
+    // 构建 multipart/form-data
     const formData = new FormData();
-    const operations = {
-      query: `mutation($file: Upload!) {
-        fileUpload(file: $file) {
-          uploadedFile { url contentType }
-          errors { field message code }
+    formData.append('operations', JSON.stringify({
+      query: `
+        mutation($file: Upload!) {
+          fileUpload(file: $file) {
+            uploadedFile { url contentType }
+            errors { field message code }
+          }
         }
-      }`,
+      `,
       variables: { file: null },
-    };
-    formData.append('operations', JSON.stringify(operations));
-    const map = { '0': ['variables.file'] };
-    formData.append('map', JSON.stringify(map));
-    const fileStream = fs.createReadStream(file.filepath);
-    formData.append('0', fileStream, file.originalFilename || 'upload.bin');
+    }));
+    formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
+    // 处理可能为 null 的 originalFilename
+    const filename = file.originalFilename || 'upload.bin';
+    formData.append('0', fs.createReadStream(file.filepath), filename);
 
-    // 调用 Saleor GraphQL 接口
+    // 发起请求时合并 FormData 自带的 headers
     const saleorApiUrl = process.env.SALEOR_API_URL!;
     const token = process.env.SALEOR_TOKEN!;
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
+        ...formData.getHeaders()               // 自动添加 Content-Type 等头
       },
-      body: formData as any,  // 浏览器端 FormData
+      body: formData as any
     });
 
     const result = await response.json();

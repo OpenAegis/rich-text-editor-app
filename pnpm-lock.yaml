@@ -8,6 +8,21 @@ importers:
 
   .:
     dependencies:
+      '@bomdi/codebox':
+        specifier: ^2.0.0
+        version: 2.0.0
+      '@editorjs/attaches':
+        specifier: ^1.3.0
+        version: 1.3.0
+      '@editorjs/checklist':
+        specifier: ^1.6.0
+        version: 1.6.0
+      '@editorjs/code':
+        specifier: ^2.9.2
+        version: 2.9.3
+      '@editorjs/delimiter':
+        specifier: ^1.4.2
+        version: 1.4.2
       '@editorjs/editorjs':
         specifier: ^2.28.2
         version: 2.31.0
@@ -23,15 +38,27 @@ importers:
       '@editorjs/inline-code':
         specifier: ^1.5.2
         version: 1.5.2
+      '@editorjs/link':
+        specifier: ^2.6.0
+        version: 2.6.2
       '@editorjs/list':
         specifier: ^1.9.0
         version: 1.10.0
       '@editorjs/marker':
         specifier: ^1.4.0
         version: 1.4.0
+      '@editorjs/nested-list':
+        specifier: ^1.4.0
+        version: 1.4.3
+      '@editorjs/personality':
+        specifier: ^2.0.0
+        version: 2.0.2
       '@editorjs/quote':
         specifier: ^2.5.0
         version: 2.7.6
+      '@editorjs/raw':
+        specifier: ^2.5.0
+        version: 2.5.1
       '@editorjs/table':
         specifier: ^2.3.0
         version: 2.4.5
@@ -41,27 +68,42 @@ importers:
       '@editorjs/underline':
         specifier: ^1.2.1
         version: 1.2.1
+      '@editorjs/warning':
+        specifier: ^1.4.0
+        version: 1.4.1
       '@saleor/app-sdk':
         specifier: 1.3.0
-        version: 1.3.0(graphql@16.8.1)(next@15.1.7(@babel/core@7.23.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 1.3.0(graphql@16.8.1)(next@15.1.7(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@saleor/macaw-ui':
         specifier: 1.3.1
         version: 1.3.1(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(@vanilla-extract/css@1.14.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@urql/exchange-auth':
         specifier: ^1.0.0
         version: 1.0.0(graphql@16.8.1)
+      editorjs-alert:
+        specifier: ^1.0.0
+        version: 1.1.4
+      editorjs-button:
+        specifier: ^1.0.0
+        version: 1.0.4
+      editorjs-text-alignment-blocktune:
+        specifier: ^1.0.3
+        version: 1.0.3
       editorjs-text-color-plugin:
         specifier: ^2.0.4
         version: 2.0.4
       editorjs-undo:
         specifier: ^2.0.28
         version: 2.0.28
+      form-data:
+        specifier: ^4.0.4
+        version: 4.0.4
       formidable:
         specifier: ^3.5.1
         version: 3.5.4
       next:
         specifier: 15.1.7
-        version: 15.1.7(@babel/core@7.23.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 15.1.7(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -77,7 +119,7 @@ importers:
         version: 3.2.0(graphql@16.8.1)
       '@graphql-codegen/cli':
         specifier: 3.3.1
-        version: 3.3.1(@babel/core@7.23.0)(@types/node@22.18.6)(enquirer@2.4.1)(graphql@16.8.1)
+        version: 3.3.1(@babel/core@7.24.0)(@types/node@22.18.6)(enquirer@2.4.1)(graphql@16.8.1)
       '@graphql-codegen/introspection':
         specifier: 3.0.1
         version: 3.0.1(graphql@16.8.1)
@@ -555,6 +597,9 @@ packages:
     resolution: {integrity: sha512-+j7a5c253RfKh8iABBhywc8NSfP5LURe7Uh4qpsh6jc+aLJguvmIUBdjSdEMQv2bENrCR5MfRdjGo7vzS/ob7w==}
     engines: {node: '>=6.9.0'}
 
+  '@bomdi/codebox@2.0.0':
+    resolution: {integrity: sha512-t1xjfur4wAWfKsoS+KkeARUVxBM43QwIMVxqEmhEhyCI7ixhFSBtda8FWZ9udk/+SRdM6gXPaxd2/yUQfEuDbA==}
+
   '@changesets/apply-release-plan@7.0.13':
     resolution: {integrity: sha512-BIW7bofD2yAWoE8H4V40FikC+1nNFEKBisMECccS16W1rt6qqhNTBDmIw5HaqmMgtLNz9e7oiALiEUuKrQ4oHg==}
 
@@ -610,6 +655,9 @@ packages:
   '@changesets/write@0.4.0':
     resolution: {integrity: sha512-CdTLvIOPiCNuH71pyDu3rA+Q0n65cmAbXnwWH84rKGiFumFzkmHNT8KHTMEchcxN+Kl8I54xGUhJ7l3E7X396Q==}
 
+  '@codexteam/icons@0.0.2':
+    resolution: {integrity: sha512-KdeKj3TwaTHqM3IXd5YjeJP39PBUZTb+dtHjGlf5+b0VgsxYD4qzsZkb11lzopZbAuDsHaZJmAYQ8LFligIT6Q==}
+
   '@codexteam/icons@0.0.4':
     resolution: {integrity: sha512-V8N/TY2TGyas4wLrPIFq7bcow68b3gu8DfDt1+rrHPtXxcexadKauRJL6eQgfG7Z0LCrN4boLRawR4S9gjIh/Q==}
 
@@ -630,8 +678,20 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
+  '@editorjs/attaches@1.3.0':
+    resolution: {integrity: sha512-D+dj55EsC5bvXV///Dh/+KN4unuI0j6SU3f5QcMA5zrfda47PNKwbKOuwMBJwn0O+o5qwqrFv67g98lAo2qqVQ==}
+
   '@editorjs/caret@1.0.3':
     resolution: {integrity: sha512-VmgwQJZgL/LQjk049JunzRV1YCa0vDi+BNEpbDmr5cp3lGZllq9QQFO1eI71ZPzvFVn3vvhb+eOif4sAEyGgbw==}
+
+  '@editorjs/checklist@1.6.0':
+    resolution: {integrity: sha512-hRNP36DInr73mSK3noHBQeoQb7DA12ANfqTXufEkTgQzx+k4mRJ0HdeGukTIR4JbwjHJ9ecUBnnQqIEGnxCFEg==}
+
+  '@editorjs/code@2.9.3':
+    resolution: {integrity: sha512-nXUrK3CjhpubvShYtcbkpZ9SU15IYwmJOsWZrlWYSzy9unZBRQthii6eABndsCtODzzV0yiSKmTp00RQkFow3Q==}
+
+  '@editorjs/delimiter@1.4.2':
+    resolution: {integrity: sha512-S8q2LpeYdYkVShLp7K8c4HLthDHBevLw+sT+iO0+SH0oMvFmld9SUon3DFzMQ2gG07EOdZGRZ958+sVxyvFjZw==}
 
   '@editorjs/dom@0.0.5':
     resolution: {integrity: sha512-SZ78Gwpkp3EUhjBIp0lSojeQ35V9acF8SubJsMeOH/vlOUE40GOnvvwWZnF05lO7bIB0dOHhhJy4N7IIAWxP2w==}
@@ -660,14 +720,26 @@ packages:
   '@editorjs/inline-code@1.5.2':
     resolution: {integrity: sha512-IpEvwMTP3q89T/6vTi3ACoSMOcTdywtMsci1w19+Z/lxQn/NVuVah++ro93wQ/1ZVTyCr+TPUCchxwzY1/xaMg==}
 
+  '@editorjs/link@2.6.2':
+    resolution: {integrity: sha512-3cPx6M4ZvwDDvsi0E0fvMR3rvveAV/C0GRo1JLeZJ9cG9QgyoNolj4eu5Eqx3/r1XTC/he54qYEIZ/Dc4Lr4Ow==}
+
   '@editorjs/list@1.10.0':
     resolution: {integrity: sha512-zXCHaNcIscpefnteBOS3x+98f/qBgEVsv+OvtKoTDZipMNqck2uVG+X2qMQr8xcwtJrj9ySX54lUac9FDlAHnA==}
 
   '@editorjs/marker@1.4.0':
     resolution: {integrity: sha512-5ipEXfL44jTTRzgNp/p/YjMO7jT08S5z4V8qA3FFJTfdhKgQyM3mvP1zpdYKw47ZZpVWMCncvk5Nto3BxihEtg==}
 
+  '@editorjs/nested-list@1.4.3':
+    resolution: {integrity: sha512-3jTJd6H2Zwe8SeiI9li9AolkCxFVitEnCpJjDI6+la/HslSJC827fHivc9hue6JmC8esA4yri0KCMyp8N4ykww==}
+
+  '@editorjs/personality@2.0.2':
+    resolution: {integrity: sha512-CnQ15cW14bHQrjUT6qWQHJJOrTyAbTlIOeARQcQ1COU3OFWuJOmMsWFUFYpz5POMmQk30Cgi9qdFyyFfZf0asA==}
+
   '@editorjs/quote@2.7.6':
     resolution: {integrity: sha512-D01KUMSDj2r+6Z+xjDkQqI+y6URpeHCvj0+P4pah+GtkG040lWjFb2H4pgHFXuol2cbfyAoraYSw85fuPheCvw==}
+
+  '@editorjs/raw@2.5.1':
+    resolution: {integrity: sha512-h7CjXtfSTe4Bj1CL84ch5NW0q0CdrlWsLzQ/kbaFTgx914CzKz4Ug+xgdvytVO1dd1QzB5/HCW0ic1VxtgkhMQ==}
 
   '@editorjs/table@2.4.5':
     resolution: {integrity: sha512-pF48R2wc5m0c+N+RjtCLXBGZd23Rl7EjfSFpmcSViwNsu5RwMgYGrEiQ8mzVh98mbvYQwXm/NYBi9DEUUs970A==}
@@ -677,6 +749,9 @@ packages:
 
   '@editorjs/underline@1.2.1':
     resolution: {integrity: sha512-LjJ01ia6Pj0Z/elifycp9+T1bQs0eXNnIcEYKOlk0sGHLy88DPcBOh9oz1i+uWarZ4AjGsvSMaptpWe+yQNsjQ==}
+
+  '@editorjs/warning@1.4.1':
+    resolution: {integrity: sha512-7A+irJ6gIh6li4DC7qw/NiWCThlBgtoPUeeIVdldVjoATAu+a1GjS+w/5L24ReacgQJNPVQPPCoMaS1nB83agw==}
 
   '@emnapi/runtime@1.3.1':
     resolution: {integrity: sha512-kEBmG8KyqtxJZv+ygbEim+KCGtIq1fC22Ms3S4ziXmYKm8uyoLX0MHONVKwp+9opg390VaKRNt4a7A9NwmpNhw==}
@@ -2847,6 +2922,15 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
+  editorjs-alert@1.1.4:
+    resolution: {integrity: sha512-m6w/cRxnFucC3dyfrB+DTNXw70SnJNv05AX6P3bZ8qkbzB1OAJTuaFrEKZBdN0YvEvTe1zvg3S344EkPAveemQ==}
+
+  editorjs-button@1.0.4:
+    resolution: {integrity: sha512-3wn8VrcGgil0gCTrgJNktiYnsC8YdS1TueNOyWr2geZLSUE9KPSVyQpPAduCdVEy+wbWQqrftczENNdLpxDGsQ==}
+
+  editorjs-text-alignment-blocktune@1.0.3:
+    resolution: {integrity: sha512-DAJ2LJP+WjETvU4lVOJCqZ1kZkKHp0GkujkqZgza9DRv7bO46m1M/s2d5Ba5hPFdmqk1vA/ci++MQXgWD7mWYw==}
+
   editorjs-text-color-plugin@2.0.4:
     resolution: {integrity: sha512-QpibTkOxs3ndlKNOLT8ZlC4ktc3/eKIajiLO0Jm/hh9AJug/CrM1/rAvHy+ldfUKavbWeI+YZvgjad0YTyoyGw==}
 
@@ -2902,10 +2986,6 @@ packages:
 
   es-object-atoms@1.1.1:
     resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
-    engines: {node: '>= 0.4'}
-
-  es-set-tostringtag@2.0.1:
-    resolution: {integrity: sha512-g3OMbtlwY3QewlqAiMLI47KywjWZoEytKr8pf6iTC8uJq5bIAH52Z9pnQ8pVL6whrCto53JZDuUIsifGeLorTg==}
     engines: {node: '>= 0.4'}
 
   es-set-tostringtag@2.1.0:
@@ -3195,8 +3275,8 @@ packages:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
     engines: {node: '>= 0.4'}
 
-  form-data@4.0.0:
-    resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==}
+  form-data@4.0.4:
+    resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
     engines: {node: '>= 6'}
 
   formidable@3.5.4:
@@ -5467,9 +5547,9 @@ snapshots:
       '@babel/core': 7.23.0
       '@babel/helper-plugin-utils': 7.22.5
 
-  '@babel/plugin-syntax-import-assertions@7.22.5(@babel/core@7.23.0)':
+  '@babel/plugin-syntax-import-assertions@7.22.5(@babel/core@7.24.0)':
     dependencies:
-      '@babel/core': 7.23.0
+      '@babel/core': 7.24.0
       '@babel/helper-plugin-utils': 7.22.5
 
   '@babel/plugin-syntax-jsx@7.22.5(@babel/core@7.23.0)':
@@ -5674,6 +5754,8 @@ snapshots:
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
 
+  '@bomdi/codebox@2.0.0': {}
+
   '@changesets/apply-release-plan@7.0.13':
     dependencies:
       '@changesets/config': 3.1.1
@@ -5818,6 +5900,8 @@ snapshots:
       human-id: 4.1.1
       prettier: 2.8.8
 
+  '@codexteam/icons@0.0.2': {}
+
   '@codexteam/icons@0.0.4': {}
 
   '@codexteam/icons@0.0.5': {}
@@ -5833,9 +5917,25 @@ snapshots:
       '@dessert-box/core': 0.2.0
       react: 18.3.1
 
+  '@editorjs/attaches@1.3.0':
+    dependencies:
+      '@codexteam/icons': 0.0.4
+
   '@editorjs/caret@1.0.3':
     dependencies:
       '@editorjs/dom': 1.0.1
+
+  '@editorjs/checklist@1.6.0':
+    dependencies:
+      '@codexteam/icons': 0.3.3
+
+  '@editorjs/code@2.9.3':
+    dependencies:
+      '@codexteam/icons': 0.3.3
+
+  '@editorjs/delimiter@1.4.2':
+    dependencies:
+      '@codexteam/icons': 0.3.3
 
   '@editorjs/dom@0.0.5':
     dependencies:
@@ -5872,6 +5972,11 @@ snapshots:
     dependencies:
       '@codexteam/icons': 0.3.3
 
+  '@editorjs/link@2.6.2':
+    dependencies:
+      '@babel/runtime': 7.25.6
+      '@codexteam/icons': 0.0.4
+
   '@editorjs/list@1.10.0':
     dependencies:
       '@codexteam/icons': 0.0.4
@@ -5880,10 +5985,20 @@ snapshots:
     dependencies:
       '@codexteam/icons': 0.0.5
 
+  '@editorjs/nested-list@1.4.3':
+    dependencies:
+      '@codexteam/icons': 0.0.2
+
+  '@editorjs/personality@2.0.2': {}
+
   '@editorjs/quote@2.7.6':
     dependencies:
       '@codexteam/icons': 0.3.3
       '@editorjs/dom': 0.0.5
+
+  '@editorjs/raw@2.5.1':
+    dependencies:
+      '@codexteam/icons': 0.0.4
 
   '@editorjs/table@2.4.5':
     dependencies:
@@ -5894,6 +6009,11 @@ snapshots:
   '@editorjs/underline@1.2.1':
     dependencies:
       '@codexteam/icons': 0.3.3
+
+  '@editorjs/warning@1.4.1':
+    dependencies:
+      '@codexteam/icons': 0.3.3
+      '@editorjs/editorjs': 2.31.0
 
   '@emnapi/runtime@1.3.1':
     dependencies:
@@ -6097,7 +6217,7 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.4.1
 
-  '@graphql-codegen/cli@3.3.1(@babel/core@7.23.0)(@types/node@22.18.6)(enquirer@2.4.1)(graphql@16.8.1)':
+  '@graphql-codegen/cli@3.3.1(@babel/core@7.24.0)(@types/node@22.18.6)(enquirer@2.4.1)(graphql@16.8.1)':
     dependencies:
       '@babel/generator': 7.23.0
       '@babel/template': 7.22.15
@@ -6105,9 +6225,9 @@ snapshots:
       '@graphql-codegen/core': 3.1.0(graphql@16.8.1)
       '@graphql-codegen/plugin-helpers': 4.2.0(graphql@16.8.1)
       '@graphql-tools/apollo-engine-loader': 7.3.26(graphql@16.8.1)
-      '@graphql-tools/code-file-loader': 7.3.23(@babel/core@7.23.0)(graphql@16.8.1)
-      '@graphql-tools/git-loader': 7.3.0(@babel/core@7.23.0)(graphql@16.8.1)
-      '@graphql-tools/github-loader': 7.3.28(@babel/core@7.23.0)(@types/node@22.18.6)(graphql@16.8.1)
+      '@graphql-tools/code-file-loader': 7.3.23(@babel/core@7.24.0)(graphql@16.8.1)
+      '@graphql-tools/git-loader': 7.3.0(@babel/core@7.24.0)(graphql@16.8.1)
+      '@graphql-tools/github-loader': 7.3.28(@babel/core@7.24.0)(@types/node@22.18.6)(graphql@16.8.1)
       '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.1)
       '@graphql-tools/json-file-loader': 7.4.18(graphql@16.8.1)
       '@graphql-tools/load': 7.8.14(graphql@16.8.1)
@@ -6297,9 +6417,9 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/code-file-loader@7.3.23(@babel/core@7.23.0)(graphql@16.8.1)':
+  '@graphql-tools/code-file-loader@7.3.23(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.23.0)(graphql@16.8.1)
+      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
       globby: 11.1.0
       graphql: 16.8.1
@@ -6369,9 +6489,9 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/git-loader@7.3.0(@babel/core@7.23.0)(graphql@16.8.1)':
+  '@graphql-tools/git-loader@7.3.0(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.23.0)(graphql@16.8.1)
+      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
       graphql: 16.8.1
       is-glob: 4.0.3
@@ -6382,11 +6502,11 @@ snapshots:
       - '@babel/core'
       - supports-color
 
-  '@graphql-tools/github-loader@7.3.28(@babel/core@7.23.0)(@types/node@22.18.6)(graphql@16.8.1)':
+  '@graphql-tools/github-loader@7.3.28(@babel/core@7.24.0)(@types/node@22.18.6)(graphql@16.8.1)':
     dependencies:
       '@ardatan/sync-fetch': 0.0.1
       '@graphql-tools/executor-http': 0.1.10(@types/node@22.18.6)(graphql@16.8.1)
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.23.0)(graphql@16.8.1)
+      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
       '@whatwg-node/fetch': 0.8.8
       graphql: 16.8.1
@@ -6407,10 +6527,10 @@ snapshots:
       tslib: 2.6.2
       unixify: 1.0.0
 
-  '@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.23.0)(graphql@16.8.1)':
+  '@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
       '@babel/parser': 7.23.0
-      '@babel/plugin-syntax-import-assertions': 7.22.5(@babel/core@7.23.0)
+      '@babel/plugin-syntax-import-assertions': 7.22.5(@babel/core@7.24.0)
       '@babel/traverse': 7.23.0
       '@babel/types': 7.23.0
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
@@ -7285,14 +7405,14 @@ snapshots:
 
   '@rushstack/eslint-patch@1.12.0': {}
 
-  '@saleor/app-sdk@1.3.0(graphql@16.8.1)(next@15.1.7(@babel/core@7.23.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@saleor/app-sdk@1.3.0(graphql@16.8.1)(next@15.1.7(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.30.0
       debug: 4.4.0
       graphql: 16.8.1
       jose: 5.10.0
-      next: 15.1.7(@babel/core@7.23.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 15.1.7(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       raw-body: 3.0.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -8330,6 +8450,12 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
+  editorjs-alert@1.1.4: {}
+
+  editorjs-button@1.0.4: {}
+
+  editorjs-text-alignment-blocktune@1.0.3: {}
+
   editorjs-text-color-plugin@2.0.4: {}
 
   editorjs-undo@2.0.28:
@@ -8366,7 +8492,7 @@ snapshots:
       arraybuffer.prototype.slice: 1.0.2
       available-typed-arrays: 1.0.5
       call-bind: 1.0.2
-      es-set-tostringtag: 2.0.1
+      es-set-tostringtag: 2.1.0
       es-to-primitive: 1.2.1
       function.prototype.name: 1.1.6
       get-intrinsic: 1.2.1
@@ -8485,12 +8611,6 @@ snapshots:
   es-object-atoms@1.1.1:
     dependencies:
       es-errors: 1.3.0
-
-  es-set-tostringtag@2.0.1:
-    dependencies:
-      get-intrinsic: 1.2.1
-      has: 1.0.4
-      has-tostringtag: 1.0.0
 
   es-set-tostringtag@2.1.0:
     dependencies:
@@ -8929,10 +9049,12 @@ snapshots:
     dependencies:
       is-callable: 1.2.7
 
-  form-data@4.0.0:
+  form-data@4.0.4:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
+      es-set-tostringtag: 2.1.0
+      hasown: 2.0.2
       mime-types: 2.1.35
 
   formidable@3.5.4:
@@ -9533,7 +9655,7 @@ snapshots:
       decimal.js: 10.4.3
       domexception: 4.0.0
       escodegen: 2.1.0
-      form-data: 4.0.0
+      form-data: 4.0.4
       html-encoding-sniffer: 3.0.0
       http-proxy-agent: 5.0.0
       https-proxy-agent: 5.0.1
@@ -9761,7 +9883,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@15.1.7(@babel/core@7.23.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@15.1.7(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 15.1.7
       '@swc/counter': 0.1.3
@@ -9771,7 +9893,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.6(@babel/core@7.23.0)(react@18.3.1)
+      styled-jsx: 5.1.6(@babel/core@7.24.0)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.1.7
       '@next/swc-darwin-x64': 15.1.7
@@ -10565,12 +10687,12 @@ snapshots:
     dependencies:
       js-tokens: 9.0.0
 
-  styled-jsx@5.1.6(@babel/core@7.23.0)(react@18.3.1):
+  styled-jsx@5.1.6(@babel/core@7.24.0)(react@18.3.1):
     dependencies:
       client-only: 0.0.1
       react: 18.3.1
     optionalDependencies:
-      '@babel/core': 7.23.0
+      '@babel/core': 7.24.0
 
   supports-color@5.5.0:
     dependencies:
