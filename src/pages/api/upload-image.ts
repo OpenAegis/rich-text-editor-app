@@ -127,17 +127,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 构造 Node.js FormData
     const form = new FormData();
+    const query = `mutation($file: Upload!) { fileUpload(file: $file) { uploadedFile { url contentType } errors { field message code } } }`;
     form.append(
       'operations',
       JSON.stringify({
-        query: `
-          mutation($file: Upload!) {
-            fileUpload(file: $file) {
-              uploadedFile { url contentType }
-              errors { field message code }
-            }
-          }
-        `,
+        query,
         variables: { file: null },
       })
     ); // 必含完整 query
@@ -145,6 +139,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     form.append('0', fs.createReadStream(file.filepath), file.originalFilename || 'upload.bin');
     
     console.log('Node.js FormData created with proper encoding');
+    console.log('Operations JSON:', JSON.stringify({ query, variables: { file: null } }));
 
     console.log('Making request to:', saleorApiUrl);
     console.log('Using token:', token ? token.substring(0, 20) + '...' : 'No token');
@@ -152,6 +147,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('File exists:', fs.existsSync(file.filepath));
 
     console.log('FormData headers:', form.getHeaders());
+    
+    // 计算 Content-Length
+    let contentLength: number;
+    try {
+      contentLength = form.getLengthSync();
+      console.log('Calculated Content-Length:', contentLength);
+    } catch (err) {
+      console.error('Failed to calculate Content-Length:', err);
+      contentLength = 0;
+    }
     
     // 先测试一个简单的GraphQL查询来验证认证
     console.log('Testing simple GraphQL query first...');
@@ -182,6 +187,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       headers: {
         Authorization: `Bearer ${token}`,
         ...form.getHeaders(),          // 自动注入正确 Content-Type
+        ...(contentLength > 0 && { 'Content-Length': contentLength.toString() }),
       },
       // @ts-ignore: Node.js Readable to BodyInit
       body: form,        // Node.js Readable stream
