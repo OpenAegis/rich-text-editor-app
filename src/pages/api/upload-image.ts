@@ -79,23 +79,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('APL does not support getAll, trying environment fallback');
         
         const defaultSaleorUrl = process.env.SALEOR_API_URL || 'https://api.lzsm.shop/graphql/';
+        console.log('Trying to get auth data for URL:', defaultSaleorUrl);
         
         try {
           authData = await saleorApp.apl.get(defaultSaleorUrl);
           if (authData) {
             saleorApiUrl = defaultSaleorUrl;
             receivedToken = authData.token;
-            console.log('Using stored auth data from UpstashAPL');
+            console.log('Using stored auth data from UpstashAPL:', {
+              domain: authData.domain,
+              hasToken: !!authData.token,
+              tokenPrefix: authData.token ? authData.token.substring(0, 10) + '...' : 'none'
+            });
           } else {
+            console.log('No auth data found for URL:', defaultSaleorUrl);
             return res.status(401).json({
               success: 0,
               message: 'No authentication data found'
             });
           }
         } catch (aplError) {
+          console.error('APL error:', aplError);
           return res.status(500).json({
             success: 0,
-            message: 'Failed to retrieve authentication data'
+            message: 'Failed to retrieve authentication data',
+            details: aplError instanceof Error ? aplError.message : 'Unknown error'
           });
         }
       }
@@ -170,13 +178,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     console.log('Saleor upload response status:', uploadResponse.status);
+    console.log('Request details:', {
+      url: saleorApiUrl,
+      hasToken: !!tokenToUse,
+      tokenPrefix: tokenToUse ? tokenToUse.substring(0, 10) + '...' : 'none'
+    });
     
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text();
-      console.error('Saleor upload failed:', errorText);
+      console.error('Saleor upload failed:', {
+        status: uploadResponse.status,
+        statusText: uploadResponse.statusText,
+        headers: Object.fromEntries(uploadResponse.headers.entries()),
+        error: errorText
+      });
       return res.status(uploadResponse.status).json({
         success: 0,
-        message: `Saleor upload failed: ${uploadResponse.status}`
+        message: `Saleor upload failed: ${uploadResponse.status}`,
+        details: errorText
       });
     }
 
