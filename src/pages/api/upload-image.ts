@@ -102,29 +102,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 构建 multipart/form-data
     const formData = new FormData();
     formData.append('operations', JSON.stringify({
-      query: `mutation($file: Upload!) {
-        fileUpload(file: $file) {
-          uploadedFile { url contentType }
-          errors { field message code }
+      query: `
+        mutation($file: Upload!) {
+          fileUpload(file: $file) {
+            uploadedFile { url contentType }
+            errors { field message code }
+          }
         }
-      }`,
+      `,
       variables: { file: null },
     }));
     formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
-    // 处理可能为 null 的 originalFilename
-    const filename = file.originalFilename || 'upload.bin';
-    formData.append('0', fs.createReadStream(file.filepath), filename);
+    // 直接传递文件流，不指定文件名
+    formData.append('0', fs.createReadStream(file.filepath));
 
     console.log('Making request to:', saleorApiUrl); // 调试日志
-    console.log('Operations:', JSON.stringify({
-      query: `mutation($file: Upload!) {
-        fileUpload(file: $file) {
-          uploadedFile { url contentType }
-          errors { field message code }
-        }
-      }`,
-      variables: { file: null },
-    }));
+    console.log('Using token:', token ? token.substring(0, 20) + '...' : 'No token');
+    console.log('File path:', file.filepath);
+    console.log('File exists:', fs.existsSync(file.filepath));
 
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
