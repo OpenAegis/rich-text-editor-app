@@ -190,7 +190,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
       headers,
-      body: form,
+      body: form as any,
     });
 
     console.log('Response status:', response.status);
