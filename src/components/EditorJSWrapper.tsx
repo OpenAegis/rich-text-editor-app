@@ -104,8 +104,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         // @ts-ignore
         const Personality = (await import('@editorjs/personality')).default;
         // @ts-ignore
-        const Hyperlink = (await import('editorjs-hyperlink')).default;
-        // @ts-ignore
         const Button = (await import('editorjs-button')).default;
         // @ts-ignore
         const Alert = (await import('editorjs-alert')).default;
@@ -177,18 +175,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             underline: Underline,
             // @ts-ignore
             inlineCode: InlineCode,
-            // @ts-ignore
-            hyperlink: {
-              class: Hyperlink,
-              config: {
-                shortcut: 'CMD+L',
-                target: '_blank',
-                rel: 'nofollow',
-                availableTargets: ['_blank', '_self'],
-                availableRels: ['author', 'noreferrer'],
-                validate: false,
-              }
-            },
             // @ts-ignore
             Color: {
               class: ColorPlugin,
