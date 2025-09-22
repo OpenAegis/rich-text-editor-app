@@ -3,6 +3,32 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
 import fs from 'fs';
 import FormData from 'form-data';               // 使用社区版 FormData
+import { Redis } from '@upstash/redis';
+
+// 数据库配置接口
+interface DatabaseConfig {
+  token: string;
+  saleorApiUrl: string;
+  appId: string;
+  jwks: string;
+}
+
+// 从Upstash Redis获取配置
+async function getConfigFromDatabase(): Promise<DatabaseConfig | null> {
+  try {
+    const redis = new Redis({
+      url: process.env.UPSTASH_URL!,
+      token: process.env.UPSTASH_TOKEN!,
+    });
+    
+    // 获取配置数据，假设存储在key 'saleor_config' 下
+    const config = await redis.get('saleor_config') as DatabaseConfig;
+    return config;
+  } catch (error) {
+    console.error('Failed to get config from Upstash:', error);
+    return null;
+  }
+}
 
 export const config = { api: { bodyParser: false } };
 
@@ -20,6 +46,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // 从数据库获取配置
+    const config = await getConfigFromDatabase();
+    
+    if (!config) {
+      return res.status(500).json({ success: 0, message: 'No configuration found in database' });
+    }
+    
+    const { saleorApiUrl, token } = config;
+    
     const { files } = await parseForm(req);
     console.log('Parsed files:', files); // 调试日志
     
@@ -64,9 +99,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const filename = file.originalFilename || 'upload.bin';
     formData.append('0', fs.createReadStream(file.filepath), filename);
 
-    // 发起请求时合并 FormData 自带的 headers
-    const saleorApiUrl = process.env.SALEOR_API_URL!;
-    const token = process.env.SALEOR_TOKEN!;
+    console.log('Making request to:', saleorApiUrl); // 调试日志
+
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
       headers: {
