@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
 import fs from 'fs';
 import FormData from 'form-data';                         // Node.js FormData
+import axios from 'axios';
 import { saleorApp } from '@/saleor-app';
 
 // 数据库配置接口
@@ -148,55 +149,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('FormData headers:', form.getHeaders());
     
-    // 计算 Content-Length
-    let contentLength: number;
-    try {
-      contentLength = form.getLengthSync();
-      console.log('Calculated Content-Length:', contentLength);
-    } catch (err) {
-      console.error('Failed to calculate Content-Length:', err);
-      contentLength = 0;
-    }
-    
     // 先测试一个简单的GraphQL查询来验证认证
     console.log('Testing simple GraphQL query first...');
     try {
-      const testResponse = await fetch(saleorApiUrl, {
-        method: 'POST',
+      const testResponse = await axios.post(saleorApiUrl, {
+        query: 'query { me { email } }'
+      }, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          query: 'query { me { email } }'
-        })
       });
-      const testResult = await testResponse.json();
+      const testResult = testResponse.data;
       console.log('Test query result:', testResult);
       
       if (testResult.errors) {
         console.error('Authentication test failed:', testResult.errors);
         return res.status(401).json({ success: 0, message: 'Authentication failed', errors: testResult.errors });
       }
-    } catch (testError) {
-      console.error('Test query error:', testError);
+    } catch (testError: any) {
+      console.error('Test query error:', testError.response?.data || testError.message);
     }
     
-    const response = await fetch(saleorApiUrl, {
-      method: 'POST',
+    const axiosResponse = await axios.post(saleorApiUrl, form, {
       headers: {
         Authorization: `Bearer ${token}`,
         ...form.getHeaders(),          // 自动注入正确 Content-Type
-        ...(contentLength > 0 && { 'Content-Length': contentLength.toString() }),
       },
-      // @ts-ignore: Node.js Readable to BodyInit
-      body: form,        // Node.js Readable stream
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
+    const result = axiosResponse.data;
 
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('Response status:', axiosResponse.status);
+    console.log('Response headers:', axiosResponse.headers);
     
-    const result = await response.json();
     console.log('Full response:', JSON.stringify(result, null, 2));
     if (result.data?.fileUpload?.uploadedFile) {
       return res.status(200).json({
