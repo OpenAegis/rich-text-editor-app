@@ -82,13 +82,43 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         // @ts-ignore
         const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
         // @ts-ignore
-        const FontSize = (await import('editorjs-inline-font-size-tool')).default;
-        // @ts-ignore
         const AlignmentTune = (await import('editorjs-text-alignment-blocktune')).default;
+        // @ts-ignore
+        const Undo = (await import('editorjs-undo')).default;
+        // @ts-ignore
+        const Code = (await import('@editorjs/code')).default;
+        // @ts-ignore
+        const RawTool = (await import('@editorjs/raw')).default;
+        // @ts-ignore
+        const Delimiter = (await import('@editorjs/delimiter')).default;
+        // @ts-ignore
+        const Warning = (await import('@editorjs/warning')).default;
+        // @ts-ignore
+        const Checklist = (await import('@editorjs/checklist')).default;
+        // @ts-ignore
+        const NestedList = (await import('@editorjs/nested-list')).default;
+        // @ts-ignore
+        const AttachesTool = (await import('@editorjs/attaches')).default;
+        // @ts-ignore
+        const LinkTool = (await import('@editorjs/link')).default;
+        // @ts-ignore
+        const Personality = (await import('@editorjs/personality')).default;
+        // @ts-ignore
+        const Hyperlink = (await import('editorjs-hyperlink')).default;
+        // @ts-ignore
+        const Button = (await import('editorjs-button')).default;
+        // @ts-ignore
+        const Alert = (await import('editorjs-alert')).default;
+        // @ts-ignore
+        const Tooltip = (await import('editorjs-tooltip')).default;
         // @ts-ignore
         const StyleInline = (await import('editorjs-style')).default;
         // @ts-ignore
-        const Undo = (await import('editorjs-undo')).default;
+        const FontSize = (await import('editorjs-inline-font-size-tool')).default;
+        // @ts-ignore
+        const CodeBox = (await import('@bomdi/codebox')).default;
+        // @ts-ignore
+        const Math = (await import('editorjs-math')).default;
 
         // 加载保存的内容
         const savedContent = await loadSavedContent();
@@ -163,8 +193,21 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               config: {
                 'font-weight': 'bold',
                 'font-style': 'italic',
-                'text-decoration': 'underline',
-                'font-family': 'serif'
+                'text-decoration': 'underline'
+              }
+            },
+            // @ts-ignore
+            tooltip: Tooltip,
+            // @ts-ignore
+            hyperlink: {
+              class: Hyperlink,
+              config: {
+                shortcut: 'CMD+L',
+                target: '_blank',
+                rel: 'nofollow',
+                availableTargets: ['_blank', '_self'],
+                availableRels: ['author', 'noreferrer'],
+                validate: false,
               }
             },
             // @ts-ignore
@@ -196,6 +239,105 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 type: 'marker',
                 customPicker: true
               }
+            },
+            // @ts-ignore
+            code: {
+              class: Code,
+              config: {
+                placeholder: '输入代码...'
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            raw: {
+              class: RawTool,
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            delimiter: Delimiter,
+            // @ts-ignore
+            warning: {
+              class: Warning,
+              config: {
+                titlePlaceholder: '警告标题',
+                messagePlaceholder: '警告内容'
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            checklist: {
+              class: Checklist,
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            nestedlist: {
+              class: NestedList,
+              config: {
+                defaultStyle: 'unordered'
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            attaches: {
+              class: AttachesTool,
+              config: {
+                endpoint: '/api/upload-image'
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            linkTool: {
+              class: LinkTool,
+              config: {
+                endpoint: '/api/fetch-url'
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            personality: {
+              class: Personality,
+              config: {
+                endpoint: '/api/fetch-url'
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            button: {
+              class: Button,
+              config: {
+                css: {
+                  btnColor: "btn--gray",
+                }
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            alert: {
+              class: Alert,
+              config: {
+                alertTypes: ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'light', 'dark'],
+                defaultType: 'primary',
+                messagePlaceholder: '输入提示信息...',
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            codeBox: {
+              class: CodeBox,
+              config: {
+                themeURL: 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/styles/dracula.min.css',
+                themeName: 'atom-one-dark',
+                useDefaultTheme: 'light'
+              },
+              tunes: ['alignmentTune']
+            },
+            // @ts-ignore
+            Math: {
+              class: Math,
+              config: {
+                placeholder: '输入数学公式 (LaTeX)...'
+              },
+              tunes: ['alignmentTune']
             }
           },
           tunes: {
