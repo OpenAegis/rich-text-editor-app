@@ -241,10 +241,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // or find an alternative upload method
     console.log('Trying alternative upload approach...');
     
-    // Convert file to base64
-    const fileBuffer = fs.readFileSync(file.filepath);
-    const base64Data = fileBuffer.toString('base64');
-    const dataUrl = `data:${file.mimetype};base64,${base64Data}`;
+    // Keep the file for multipart upload instead of base64
     
     // First, get any existing product to use for media upload
     const productsQuery = `
@@ -290,10 +287,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     console.log('Using product ID for upload:', productId);
     
-    // Try using productMediaCreate as an alternative (this usually exists in Saleor)
+    // Use multipart form data for productMediaCreate
+    const FormData = require('form-data');
+    const formData = new FormData();
+    
     const uploadMutation = `
-      mutation CreateMedia($input: ProductMediaCreateInput!) {
-        productMediaCreate(input: $input) {
+      mutation CreateMedia($productId: ID!, $image: Upload!, $alt: String) {
+        productMediaCreate(input: {product: $productId, image: $image, alt: $alt}) {
           media {
             id
             url
@@ -308,22 +308,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     `;
     
+    // Create operations and map for multipart upload
+    const operations = {
+      query: uploadMutation,
+      variables: {
+        productId: productId,
+        image: null,
+        alt: file.originalFilename || 'Uploaded image'
+      }
+    };
+    
+    const map = {
+      "0": ["variables.image"]
+    };
+    
+    // Add form data
+    formData.append('operations', JSON.stringify(operations));
+    formData.append('map', JSON.stringify(map));
+    
+    // Add the file
+    const fileStream = fs.createReadStream(file.filepath);
+    formData.append('0', fileStream, {
+      filename: file.originalFilename || 'upload.png',
+      contentType: file.mimetype || 'image/png'
+    });
+    
+    console.log('Sending multipart productMediaCreate request...');
+    
     const uploadResponse = await fetch(saleorApiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${tokenToUse}`,
-        'Content-Type': 'application/json'
+        ...formData.getHeaders()
       },
-      body: JSON.stringify({
-        query: uploadMutation,
-        variables: {
-          input: {
-            product: productId,
-            image: dataUrl,
-            alt: file.originalFilename || 'Uploaded image'
-          }
-        }
-      })
+      body: formData
     });
     
     console.log('Upload response status:', uploadResponse.status);
