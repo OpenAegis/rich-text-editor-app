@@ -202,53 +202,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     if (schemaResponse.ok) {
       const schemaResult = await schemaResponse.json();
-      console.log('Available mutations:', schemaResult.data?.__schema?.mutationType?.fields?.map((f: any) => f.name).filter((name: string) => name.includes('upload') || name.includes('file') || name.includes('media')));
+      console.log('Schema response:', schemaResult);
+      const mutations = schemaResult.data?.__schema?.mutationType?.fields?.map((f: any) => f.name) || [];
+      const uploadMutations = mutations.filter((name: string) => 
+        name.includes('upload') || name.includes('file') || name.includes('media') || name.includes('Upload')
+      );
+      console.log('Available upload mutations:', uploadMutations);
+      console.log('All mutations:', mutations.slice(0, 20)); // First 20 for debugging
+    } else {
+      console.log('Schema query failed:', schemaResponse.status, await schemaResponse.text());
     }
 
-    // 创建FormData for GraphQL multipart upload
-    const FormData = require('form-data');
-    const formData = new FormData();
-    
-    const operations = {
-      query: FILE_UPLOAD_MUTATIONS.fileUpload,
-      variables: {
-        file: null
-      }
-    };
-    
-    const map = {
-      "0": ["variables.file"]
-    };
-    
-    console.log('GraphQL operations:', JSON.stringify(operations, null, 2));
-    console.log('GraphQL map:', JSON.stringify(map, null, 2));
-    
-    // 添加GraphQL操作
-    formData.append('operations', JSON.stringify(operations));
-    
-    // 添加文件映射
-    formData.append('map', JSON.stringify(map));
-    
-    // 添加文件
-    const fileStream = fs.createReadStream(file.filepath);
-    formData.append('0', fileStream, {
-      filename: file.originalFilename || 'image',
-      contentType: file.mimetype
-    });
-
-    // 发送到Saleor GraphQL
-    console.log('Request headers:', {
-      'Authorization': `Bearer ${tokenToUse}`,
-      ...formData.getHeaders()
-    });
-    
-    const uploadResponse = await fetch(saleorApiUrl, {
+    // Test with a simple query first to ensure auth works
+    console.log('Testing basic GraphQL connectivity...');
+    const testResponse = await fetch(saleorApiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${tokenToUse}`,
-        ...formData.getHeaders()
+        'Content-Type': 'application/json'
       },
-      body: formData
+      body: JSON.stringify({
+        query: `query { shop { name } }`
+      })
+    });
+    
+    if (testResponse.ok) {
+      const testResult = await testResponse.json();
+      console.log('Basic GraphQL test:', testResult);
+    } else {
+      console.log('Basic GraphQL test failed:', testResponse.status, await testResponse.text());
+      return res.status(testResponse.status).json({
+        success: 0,
+        message: `GraphQL connectivity test failed: ${testResponse.status}`
+      });
+    }
+
+    // For now, return a placeholder since we need to fix the upload format
+    return res.status(400).json({
+      success: 0,
+      message: 'File upload not yet properly configured - working on multipart format fix',
+      debug: {
+        fileReceived: !!file,
+        filename: file?.originalFilename,
+        size: file?.size,
+        authWorking: testResponse.ok
+      }
     });
 
     console.log('Saleor upload response status:', uploadResponse.status);
