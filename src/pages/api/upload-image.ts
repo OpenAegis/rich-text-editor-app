@@ -87,7 +87,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             saleorApiUrl = defaultSaleorUrl;
             receivedToken = authData.token;
             console.log('Using stored auth data from UpstashAPL:', {
-              domain: authData.domain,
               hasToken: !!authData.token,
               tokenPrefix: authData.token ? authData.token.substring(0, 10) + '...' : 'none'
             });
