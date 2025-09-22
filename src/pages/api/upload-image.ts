@@ -102,14 +102,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 构建 multipart/form-data
     const formData = new FormData();
     formData.append('operations', JSON.stringify({
-      query: `
-        mutation($file: Upload!) {
-          fileUpload(file: $file) {
-            uploadedFile { url contentType }
-            errors { field message code }
-          }
+      query: `mutation($file: Upload!) {
+        fileUpload(file: $file) {
+          uploadedFile { url contentType }
+          errors { field message code }
         }
-      `,
+      }`,
       variables: { file: null },
     }));
     formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
@@ -118,6 +116,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     formData.append('0', fs.createReadStream(file.filepath), filename);
 
     console.log('Making request to:', saleorApiUrl); // 调试日志
+    console.log('Operations:', JSON.stringify({
+      query: `mutation($file: Upload!) {
+        fileUpload(file: $file) {
+          uploadedFile { url contentType }
+          errors { field message code }
+        }
+      }`,
+      variables: { file: null },
+    }));
 
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
