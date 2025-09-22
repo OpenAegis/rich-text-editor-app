@@ -110,15 +110,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         // @ts-ignore
         const Alert = (await import('editorjs-alert')).default;
         // @ts-ignore
-        const Tooltip = (await import('editorjs-tooltip')).default;
-        // @ts-ignore
-        const StyleInline = (await import('editorjs-style')).default;
-        // @ts-ignore
-        const FontSize = (await import('editorjs-inline-font-size-tool')).default;
-        // @ts-ignore
         const CodeBox = (await import('@bomdi/codebox')).default;
-        // @ts-ignore
-        const Math = (await import('editorjs-math')).default;
 
         // 加载保存的内容
         const savedContent = await loadSavedContent();
@@ -185,19 +177,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             underline: Underline,
             // @ts-ignore
             inlineCode: InlineCode,
-            // @ts-ignore
-            fontSize: FontSize,
-            // @ts-ignore
-            style: {
-              class: StyleInline,
-              config: {
-                'font-weight': 'bold',
-                'font-style': 'italic',
-                'text-decoration': 'underline'
-              }
-            },
-            // @ts-ignore
-            tooltip: Tooltip,
             // @ts-ignore
             hyperlink: {
               class: Hyperlink,
@@ -331,14 +310,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               },
               tunes: ['alignmentTune']
             },
-            // @ts-ignore
-            Math: {
-              class: Math,
-              config: {
-                placeholder: '输入数学公式 (LaTeX)...'
-              },
-              tunes: ['alignmentTune']
-            }
           },
           tunes: {
             alignmentTune: AlignmentTune
