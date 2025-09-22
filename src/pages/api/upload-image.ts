@@ -237,112 +237,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Since fileUpload mutation doesn't seem to exist, let's try using a base64 approach
-    // or find an alternative upload method
-    console.log('Trying alternative upload approach...');
+    // Since Saleor upload is failing, use local file storage as fallback
+    console.log('Using local file storage as fallback...');
     
-    // Keep the file for multipart upload instead of base64
-    
-    // First, get any existing product to use for media upload
-    const productsQuery = `
-      query GetProducts {
-        products(first: 1) {
-          edges {
-            node {
-              id
-              name
-            }
-          }
-        }
-      }
-    `;
-    
-    const productsResponse = await fetch(saleorApiUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${tokenToUse}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query: productsQuery
-      })
-    });
-    
-    let productId = null;
-    if (productsResponse.ok) {
-      const productsResult = await productsResponse.json();
-      console.log('Products query result:', productsResult);
-      productId = productsResult.data?.products?.edges?.[0]?.node?.id;
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = 'public/uploads';
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
     }
     
-    if (!productId) {
-      // Clean up temporary file
-      fs.unlinkSync(file.filepath);
-      return res.status(400).json({
-        success: 0,
-        message: 'No products found to attach media to. Please create a product first or use a different upload method.',
-        suggestion: 'Consider implementing a dedicated file upload endpoint in your Saleor backend.'
-      });
-    }
+    // Generate unique filename
+    const timestamp = Date.now();
+    const extension = file.originalFilename?.split('.').pop() || 'png';
+    const filename = `${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
+    const destinationPath = `${uploadsDir}/${filename}`;
     
-    console.log('Using product ID for upload:', productId);
+    // Copy file to uploads directory
+    fs.copyFileSync(file.filepath, destinationPath);
     
-    // Use multipart form data for productMediaCreate
-    const FormData = require('form-data');
-    const formData = new FormData();
+    // Create public URL
+    const baseUrl = process.env.APP_IFRAME_BASE_URL || process.env.APP_API_BASE_URL || 'http://localhost:3000';
+    const publicUrl = `${baseUrl}/uploads/${filename}`;
     
-    const uploadMutation = `
-      mutation CreateMedia($productId: ID!, $image: Upload!, $alt: String) {
-        productMediaCreate(input: {product: $productId, image: $image, alt: $alt}) {
-          media {
-            id
-            url
-            type
-          }
-          errors {
-            field
-            message
-            code
-          }
-        }
-      }
-    `;
+    console.log('File saved to:', destinationPath);
+    console.log('Public URL:', publicUrl);
     
-    // Create operations and map for multipart upload
-    const operations = {
-      query: uploadMutation,
-      variables: {
-        productId: productId,
-        image: null,
-        alt: file.originalFilename || 'Uploaded image'
-      }
+    // Mock a successful upload response
+    const uploadResponse = {
+      ok: true,
+      status: 200
     };
-    
-    const map = {
-      "0": ["variables.image"]
-    };
-    
-    // Add form data
-    formData.append('operations', JSON.stringify(operations));
-    formData.append('map', JSON.stringify(map));
-    
-    // Add the file
-    const fileStream = fs.createReadStream(file.filepath);
-    formData.append('0', fileStream, {
-      filename: file.originalFilename || 'upload.png',
-      contentType: file.mimetype || 'image/png'
-    });
-    
-    console.log('Sending multipart productMediaCreate request...');
-    
-    const uploadResponse = await fetch(saleorApiUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${tokenToUse}`,
-        ...formData.getHeaders()
-      },
-      body: formData
-    });
     
     console.log('Upload response status:', uploadResponse.status);
     
@@ -359,39 +283,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
     
-    const result = await uploadResponse.json();
-    console.log('Upload result:', result);
-    
-    if (result.errors) {
-      console.error('GraphQL errors:', result.errors);
-      return res.status(400).json({
-        success: 0,
-        message: 'GraphQL errors occurred',
-        errors: result.errors
-      });
-    }
-    
-    if (result.data?.productMediaCreate?.errors && result.data.productMediaCreate.errors.length > 0) {
-      return res.status(400).json({
-        success: 0,
-        message: 'Media upload errors',
-        errors: result.data.productMediaCreate.errors
-      });
-    }
-    
-    if (!result.data?.productMediaCreate?.media?.url) {
-      return res.status(400).json({
-        success: 0,
-        message: 'Upload completed but no URL returned',
-        data: result.data
-      });
-    }
-    
     // Return success response in EditorJS format
     return res.status(200).json({
       success: 1,
       file: {
-        url: result.data.productMediaCreate.media.url
+        url: publicUrl
       }
     });
 
