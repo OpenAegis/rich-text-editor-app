@@ -188,7 +188,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (result.data?.fileUpload?.uploadedFile) {
       return res.status(200).json({
         success: 1,
-        url: result.data.fileUpload.uploadedFile.url,
+        file: {
+          url: result.data.fileUpload.uploadedFile.url,
+        },
       });
     } else {
       return res.status(500).json({
