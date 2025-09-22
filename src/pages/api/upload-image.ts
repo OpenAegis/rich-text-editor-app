@@ -36,6 +36,22 @@ async function parseForm(req: NextApiRequest) {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('=== UPLOAD IMAGE API CALLED ===');
+  console.log('Method:', req.method);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  
+  // 如果没有Authorization头部，返回详细错误信息
+  if (!req.headers['authorization']) {
+    console.log('No authorization header found - EditorJS may not be sending it');
+    return res.status(401).json({ 
+      success: 0, 
+      message: 'No Authorization header. EditorJS may not be configured to send authentication headers.',
+      debug: {
+        receivedHeaders: Object.keys(req.headers)
+      }
+    });
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ success: 0, message: 'Method not allowed' });
   }
@@ -43,24 +59,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // 获取Authorization头部
     const authorizationHeader = req.headers['authorization'] as string;
+    console.log('Authorization header:', authorizationHeader ? 'Present' : 'Missing');
     
     if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+      console.log('Invalid authorization header format');
       return res.status(401).json({ success: 0, message: 'Authorization header is required' });
     }
     
     // 提取JWT token
     const jwtToken = authorizationHeader.replace('Bearer ', '');
+    console.log('JWT token extracted:', jwtToken.substring(0, 50) + '...');
     
     // 解析JWT token获取saleorApiUrl (从iss字段)
     let saleorApiUrl: string;
     try {
       const payload = JSON.parse(Buffer.from(jwtToken.split('.')[1], 'base64').toString());
+      console.log('JWT payload:', payload);
       saleorApiUrl = payload.iss;
+      console.log('Extracted saleorApiUrl:', saleorApiUrl);
       
       if (!saleorApiUrl) {
         return res.status(400).json({ success: 0, message: 'Invalid JWT token: missing issuer' });
       }
     } catch (error) {
+      console.error('JWT parsing error:', error);
       return res.status(400).json({ success: 0, message: 'Invalid JWT token format' });
     }
     
