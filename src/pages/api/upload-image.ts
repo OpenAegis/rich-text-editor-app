@@ -128,19 +128,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 构建 multipart/form-data
     const formData = new FormData();
     
-    const operations = {
+    const operations = JSON.stringify({
       query: "mutation($file: Upload!) { fileUpload(file: $file) { uploadedFile { url contentType } errors { field message code } } }",
       variables: { file: null },
-    };
+    });
     
-    const map = { '0': ['variables.file'] };
+    const map = JSON.stringify({ '0': ['variables.file'] });
     
-    console.log('Operations to send:', JSON.stringify(operations));
-    console.log('Map to send:', JSON.stringify(map));
+    console.log('Operations to send:', operations);
+    console.log('Map to send:', map);
     
-    formData.append('operations', JSON.stringify(operations));
-    formData.append('map', JSON.stringify(map));
-    formData.append('0', fs.createReadStream(file.filepath));
+    formData.append('operations', operations);
+    formData.append('map', map);
+    formData.append('0', fs.createReadStream(file.filepath), file.originalFilename || 'upload.bin');
 
     console.log('Making request to:', saleorApiUrl);
     console.log('Using token:', token ? token.substring(0, 20) + '...' : 'No token');
