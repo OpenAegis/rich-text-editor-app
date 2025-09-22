@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
 import fs from 'fs';
 import FormData from 'form-data';               // 使用社区版 FormData
+import { saleorApp } from '@/saleor-app';
 
 export const config = { api: { bodyParser: false } };
 
@@ -20,6 +21,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // 获取 Saleor API URL（从请求头或环境变量）
+    const saleorApiUrl = req.headers['saleor-api-url'] as string || process.env.SALEOR_API_URL || 'https://api.lzsm.shop/graphql/';
+    
+    if (!saleorApiUrl) {
+      return res.status(500).json({ success: 0, message: 'Saleor API URL is not configured' });
+    }
+    
+    // 从 Upstash APL 获取认证数据
+    const authData = await saleorApp.apl.get(saleorApiUrl);
+    
+    if (!authData) {
+      return res.status(401).json({ success: 0, message: 'No authentication data found for this Saleor instance' });
+    }
+    
+    const token = authData.token;
+    
     const { files } = await parseForm(req);
     console.log('Parsed files:', files); // 调试日志
     
@@ -64,9 +81,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const filename = file.originalFilename || 'upload.bin';
     formData.append('0', fs.createReadStream(file.filepath), filename);
 
-    // 发起请求时合并 FormData 自带的 headers
-    const saleorApiUrl = process.env.SALEOR_API_URL!;
-    const token = process.env.SALEOR_TOKEN!;
+    console.log('Making request to:', saleorApiUrl); // 调试日志
+
     const response = await fetch(saleorApiUrl, {
       method: 'POST',
       headers: {
