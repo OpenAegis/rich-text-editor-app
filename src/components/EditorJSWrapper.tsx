@@ -108,9 +108,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const TextVariantTune = (await import('@editorjs/text-variant-tune')).default;
           // @ts-ignore
           const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
-          // @ts-ignore
-          const Undo = (await import('editorjs-undo')).default;
-
           console.log('所有插件导入成功');
 
           // 加载保存的内容
@@ -122,17 +119,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             data: savedContent,
             onReady: () => {
               console.log('EditorJS 初始化完成');
+              console.log('Editor 实例 isReady:', editorRef.current?.isReady);
               initializedRef.current = true;
-              // 在 onReady 中延迟初始化 Undo
-              try {
-                // @ts-ignore
-                const undo = new Undo({ editor: editorRef.current });
-                // @ts-ignore
-                undo.initialize();
-                console.log('Undo 插件初始化成功');
-              } catch (undoError) {
-                console.error('Undo 初始化失败:', undoError);
-              }
+              // 临时移除 Undo 以避免错误，后续可重新添加
+              console.log('跳过 Undo 初始化，避免 blocks undefined 错误');
             },
             onChange: (api: any, event: any) => {
               console.log('Editor 内容变化:', event);
