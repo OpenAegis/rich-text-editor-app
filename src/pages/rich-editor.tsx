@@ -32,30 +32,15 @@ export default function RichEditor() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
         alignItems: 'center',
         marginBottom: '20px',
         borderBottom: '1px solid #e0e0e0',
         paddingBottom: '15px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
-            onClick={() => window.history.back()}
-            style={{
-              padding: '4px 8px',
-              background: 'none',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            ← 返回
-          </button>
-          <h2 style={{ margin: 0, color: '#333' }}>商品富文本编辑器</h2>
-        </div>
+        <h2 style={{ margin: 0, color: '#333' }}>商品富文本编辑器</h2>
         <div style={{ fontSize: '14px', color: '#666' }}>
           Saleor 富文本编辑器扩展
         </div>
