@@ -146,8 +146,16 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               } else {
                 console.warn('Editor isReady not available, skipping await');
               }
-              // 添加日志检查初始化后的工具配置
+              // 手动修复config传递问题
               if (editorRef.current && editorRef.current.tools) {
+                if (editorRef.current.tools.Color && !editorRef.current.tools.Color.config) {
+                  editorRef.current.tools.Color.config = editorConfig.tools.Color.config;
+                  console.log('Manually set Color config:', editorRef.current.tools.Color.config);
+                }
+                if (editorRef.current.tools.Marker && !editorRef.current.tools.Marker.config) {
+                  editorRef.current.tools.Marker.config = editorConfig.tools.Marker.config;
+                  console.log('Manually set Marker config:', editorRef.current.tools.Marker.config);
+                }
                 console.log('After init, Color tool config:', editorRef.current.tools.Color?.config);
                 console.log('After init, Marker tool config:', editorRef.current.tools.Marker?.config);
               }
