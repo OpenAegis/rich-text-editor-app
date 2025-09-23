@@ -56,116 +56,135 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
     };
     
     const initEditor = async () => {
+      console.log('开始初始化 EditorJS');
+      console.log('当前 window 对象:', typeof window !== 'undefined');
+      console.log('Editor holder 元素:', document.getElementById('editorjs'));
+      
       if (typeof window !== 'undefined') {
-        // @ts-ignore
-        const EditorJS = (await import('@editorjs/editorjs')).default;
-        // @ts-ignore
-        const Header = (await import('@editorjs/header')).default;
-        // @ts-ignore
-        const List = (await import('@editorjs/list')).default;
-        // @ts-ignore
-        const Image = (await import('@editorjs/image')).default;
-        // @ts-ignore
-        const Table = (await import('@editorjs/table')).default;
-        // @ts-ignore
-        const Quote = (await import('@editorjs/quote')).default;
-        // @ts-ignore
-        const Embed = (await import('@editorjs/embed')).default;
-        // @ts-ignore
-        const Marker = (await import('@editorjs/marker')).default;
-        // @ts-ignore
-        const Underline = (await import('@editorjs/underline')).default;
-        // @ts-ignore
-        const InlineCode = (await import('@editorjs/inline-code')).default;
-        // @ts-ignore
-        const TextVariantTune = (await import('@editorjs/text-variant-tune')).default;
-        // @ts-ignore
-        const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
-        // @ts-ignore
-        const Undo = (await import('editorjs-undo')).default;
+        try {
+          // @ts-ignore
+          const EditorJS = (await import('@editorjs/editorjs')).default;
+          console.log('EditorJS 导入成功:', EditorJS);
+          
+          // @ts-ignore
+          const Header = (await import('@editorjs/header')).default;
+          // @ts-ignore
+          const List = (await import('@editorjs/list')).default;
+          // @ts-ignore
+          const Image = (await import('@editorjs/image')).default;
+          // @ts-ignore
+          const Table = (await import('@editorjs/table')).default;
+          // @ts-ignore
+          const Quote = (await import('@editorjs/quote')).default;
+          // @ts-ignore
+          const Embed = (await import('@editorjs/embed')).default;
+          // @ts-ignore
+          const Marker = (await import('@editorjs/marker')).default;
+          // @ts-ignore
+          const Underline = (await import('@editorjs/underline')).default;
+          // @ts-ignore
+          const InlineCode = (await import('@editorjs/inline-code')).default;
+          // @ts-ignore
+          const TextVariantTune = (await import('@editorjs/text-variant-tune')).default;
+          // @ts-ignore
+          const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
+          // @ts-ignore
+          const Undo = (await import('editorjs-undo')).default;
 
-        // 加载保存的内容
-        const savedContent = await loadSavedContent();
-        console.log('Loaded content:', savedContent);
+          console.log('所有插件导入成功');
 
-        // @ts-ignore
-        editorRef.current = new EditorJS({
-          holder: 'editorjs',
-          data: savedContent,
-          onReady: () => {
-            console.log('EditorJS is ready');
-          },
-          onChange: () => {
-            console.log('Editor content changed');
-          },
-          tools: {
-            // @ts-ignore
-            header: Header,
-            // @ts-ignore
-            list: List,
-            // @ts-ignore
-            image: {
-              class: Image,
-              config: {
-                endpoints: {
-                  byFile: '/api/upload-image',
-                  byUrl: '/api/fetch-url',
-                },
-                additionalRequestHeaders: {
-                  'Authorization': `Bearer ${appBridge.getState().token}`,
+          // 加载保存的内容
+          const savedContent = await loadSavedContent();
+          console.log('Loaded content:', savedContent);
+
+          console.log('创建 EditorJS 实例前，holder 检查:', document.getElementById('editorjs'));
+          
+          // @ts-ignore
+          editorRef.current = new EditorJS({
+            holder: 'editorjs',
+            data: savedContent,
+            onReady: () => {
+              console.log('EditorJS 初始化完成');
+            },
+            onChange: (api, event) => {
+              console.log('Editor 内容变化:', event);
+            },
+            tools: {
+              // @ts-ignore
+              header: Header,
+              // @ts-ignore
+              list: List,
+              // @ts-ignore
+              image: {
+                class: Image,
+                config: {
+                  endpoints: {
+                    byFile: '/api/upload-image',
+                    byUrl: '/api/fetch-url',
+                  },
+                  additionalRequestHeaders: {
+                    'Authorization': `Bearer ${appBridge.getState().token}`,
+                  }
                 }
-              }
+              },
+              // @ts-ignore
+              table: Table,
+              // @ts-ignore
+              quote: Quote,
+              // @ts-ignore
+              embed: Embed,
+              // @ts-ignore
+              marker: Marker,
+              // @ts-ignore
+              underline: Underline,
+              // @ts-ignore
+              inlineCode: InlineCode,
+              // @ts-ignore
+              Color: {
+                class: ColorPlugin,
+                config: {
+                  colorCollections: [
+                    '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
+                    '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
+                    '#EC7878','#9C27B0','#673AB7','#3F51B5',
+                    '#0070FF','#03A9F4','#00BCD4','#4CAF50',
+                    '#8BC34A','#CDDC39','#FFEB3B','#FFC107',
+                    '#FF9800','#FF5722','#795548','#9E9E9E'
+                  ],
+                  defaultColor: '#000000',
+                  type: 'text',
+                  customPicker: true
+                }
+              },
+              // @ts-ignore
+              Marker: {
+                class: ColorPlugin,
+                config: {
+                  colorCollections: [
+                    '#FFFF00', '#00FF00', '#FF00FF', '#00FFFF',
+                    '#FFA500', '#FFB6C1', '#98FB98', '#87CEEB'
+                  ],
+                  defaultColor: '#FFFF00',
+                  type: 'marker',
+                  customPicker: true
+                }
+              },
             },
-            // @ts-ignore
-            table: Table,
-            // @ts-ignore
-            quote: Quote,
-            // @ts-ignore
-            embed: Embed,
-            // @ts-ignore
-            marker: Marker,
-            // @ts-ignore
-            underline: Underline,
-            // @ts-ignore
-            inlineCode: InlineCode,
-            // @ts-ignore
-            Color: {
-              class: ColorPlugin,
-              config: {
-                colorCollections: [
-                  '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
-                  '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
-                  '#EC7878','#9C27B0','#673AB7','#3F51B5',
-                  '#0070FF','#03A9F4','#00BCD4','#4CAF50',
-                  '#8BC34A','#CDDC39','#FFEB3B','#FFC107',
-                  '#FF9800','#FF5722','#795548','#9E9E9E'
-                ],
-                defaultColor: '#000000',
-                type: 'text',
-                customPicker: true
-              }
-            },
-            // @ts-ignore
-            Marker: {
-              class: ColorPlugin,
-              config: {
-                colorCollections: [
-                  '#FFFF00', '#00FF00', '#FF00FF', '#00FFFF',
-                  '#FFA500', '#FFB6C1', '#98FB98', '#87CEEB'
-                ],
-                defaultColor: '#FFFF00',
-                type: 'marker',
-                customPicker: true
-              }
-            },
-          },
-          placeholder: '在这里编写富文本内容...'
-        });
+            placeholder: '在这里编写富文本内容...'
+          });
 
-        // @ts-ignore
-        const undo = new Undo({ editor: editorRef.current });
-        // @ts-ignore
-        undo.initialize();
+          console.log('EditorJS 实例创建成功:', editorRef.current);
+
+          // @ts-ignore
+          const undo = new Undo({ editor: editorRef.current });
+          // @ts-ignore
+          undo.initialize();
+          console.log('Undo 插件初始化成功');
+        } catch (error) {
+          console.error('EditorJS 初始化失败:', error);
+        }
+      } else {
+        console.error('window 未定义，无法初始化 EditorJS');
       }
     };
 
