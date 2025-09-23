@@ -58,6 +58,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
     };
     
     const initEditor = async () => {
+      console.log('initEditor 开始');
       console.log('initEditor 调用次数:', initializedRef.current ? '重复调用' : '首次调用');
       
       if (initializedRef.current) {
@@ -88,51 +89,64 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           
           // @ts-ignore
           const Header = (await import('@editorjs/header')).default;
+          console.log('Header imported:', typeof Header);
           // @ts-ignore
           const List = (await import('@editorjs/list')).default;
+          console.log('List imported:', typeof List);
           // @ts-ignore
           const Image = (await import('@editorjs/image')).default;
+          console.log('Image imported:', typeof Image);
           // @ts-ignore
           const Table = (await import('@editorjs/table')).default;
+          console.log('Table imported:', typeof Table);
           // @ts-ignore
           const Quote = (await import('@editorjs/quote')).default;
+          console.log('Quote imported:', typeof Quote);
           // @ts-ignore
           const Embed = (await import('@editorjs/embed')).default;
+          console.log('Embed imported:', typeof Embed);
           // @ts-ignore
           const Marker = (await import('@editorjs/marker')).default;
+          console.log('Marker imported:', typeof Marker);
           // @ts-ignore
           const Underline = (await import('@editorjs/underline')).default;
+          console.log('Underline imported:', typeof Underline);
           // @ts-ignore
           const InlineCode = (await import('@editorjs/inline-code')).default;
-          // @ts-ignore
-          const TextVariantTune = (await import('@editorjs/text-variant-tune')).default;
+          console.log('InlineCode imported:', typeof InlineCode);
+          // Remove TextVariantTune import
           // @ts-ignore
           const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
+          console.log('ColorPlugin imported:', typeof ColorPlugin);
           // @ts-ignore
           const Undo = (await import('editorjs-undo')).default;
+          console.log('Undo imported:', typeof Undo);
           console.log('所有插件导入成功');
+            console.log('导入的工具组件:', { Header, List, Image, Table, Quote, Embed, Marker, Underline, InlineCode, ColorPlugin, Undo });
 
           // 加载保存的内容
           const savedContent = await loadSavedContent();
-          console.log('Loaded content:', savedContent);
+          console.log('Loaded savedContent:', savedContent);
+          const data = savedContent || { blocks: [] };
+          console.log('Using data for EditorJS:', data);
+          if (data.blocks && !Array.isArray(data.blocks)) {
+            console.warn('data.blocks is not array, setting to empty array');
+            data.blocks = [];
+          }
 
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
-            data: savedContent,
+            data: data,
             onReady: async () => {
               console.log('EditorJS 初始化完成');
+              console.log('Editor 实例:', editorRef.current);
               console.log('Editor 实例 isReady:', editorRef.current?.isReady);
-              await editorRef.current.isReady;
-              console.log('EditorJS 完全就绪，开始初始化 Undo');
-              try {
-                // @ts-ignore
-                const undo = new Undo({ editor: editorRef.current });
-                // @ts-ignore
-                undo.initialize();
-                console.log('Undo 插件初始化成功');
-              } catch (undoError) {
-                console.error('Undo 初始化失败:', undoError);
+              if (editorRef.current && editorRef.current.isReady) {
+                await editorRef.current.isReady;
+              } else {
+                console.warn('Editor isReady not available, skipping await');
               }
+              console.log('EditorJS 完全就绪');
               initializedRef.current = true;
             },
             onChange: (api: any, event: any) => {
@@ -199,27 +213,43 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             },
             placeholder: '在这里编写富文本内容...'
           };
-          
-          console.log('EditorJS 配置对象:', editorConfig);
-          console.log('配置中的 holder:', editorConfig.holder);
+
+          console.log('EditorConfig keys:', Object.keys(editorConfig));
+          console.log('当前配置的tools:', Object.keys(editorConfig.tools));
+          console.log('配置中的 holder 类型:', typeof editorConfig.holder);
+          console.log('EditorJS 配置对象 (部分):', {
+            holder: editorConfig.holder ? 'DOM Element' : null,
+            toolsKeys: Object.keys(editorConfig.tools),
+            placeholder: editorConfig.placeholder
+          });
           
           // @ts-ignore
-          editorRef.current = new EditorJS(editorConfig);
-
-          console.log('EditorJS 实例创建成功:', editorRef.current);
-
+          try {
+            editorRef.current = new EditorJS(editorConfig);
+          } catch (initError) {
+            console.error('EditorJS new 失败:', initError);
+          }
+        
+          // Remove duplicate log
+        
         } catch (error) {
           console.error('EditorJS 初始化失败:', error);
         }
       } else {
         console.error('window 未定义，无法初始化 EditorJS');
       }
+
+      console.log('initEditor 结束');
     };
+
+    console.log('useEffect 开始执行');
 
     // 延迟初始化，确保 ref 已设置
     const timeoutId = setTimeout(() => {
       initEditor();
     }, 100);
+
+    console.log('useEffect 即将结束，productId:', productId);
 
     return () => {
       clearTimeout(timeoutId);
@@ -229,6 +259,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       }
       initializedRef.current = false;
     };
+  // @ts-ignore
   }, [productId]); // 添加 productId 依赖，确保内容变化时重新加载
 
   // @ts-ignore

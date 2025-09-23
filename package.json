@@ -44,6 +44,7 @@
     "@editorjs/personality": "^2.0.0",
     "@editorjs/quote": "^2.5.0",
     "@editorjs/raw": "^2.5.0",
+    "@editorjs/simple-image": "^1.6.0",
     "@editorjs/table": "^2.3.0",
     "@editorjs/text-variant-tune": "^1.0.3",
     "@editorjs/underline": "^1.2.1",
