@@ -146,6 +146,11 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               } else {
                 console.warn('Editor isReady not available, skipping await');
               }
+              // 添加日志检查初始化后的工具配置
+              if (editorRef.current && editorRef.current.tools) {
+                console.log('After init, Color tool config:', editorRef.current.tools.Color?.config);
+                console.log('After init, Marker tool config:', editorRef.current.tools.Marker?.config);
+              }
               console.log('EditorJS 完全就绪');
               initializedRef.current = true;
             },
@@ -213,6 +218,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             },
             placeholder: '在这里编写富文本内容...'
           };
+          
+          // 添加日志检查配置阶段的工具配置
+          console.log('Config stage, Color tool config:', editorConfig.tools.Color.config);
+          console.log('Config stage, Marker tool config:', editorConfig.tools.Marker.config);
 
           console.log('EditorConfig keys:', Object.keys(editorConfig));
           console.log('当前配置的tools:', Object.keys(editorConfig.tools));
