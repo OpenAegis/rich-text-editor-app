@@ -108,6 +108,8 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const TextVariantTune = (await import('@editorjs/text-variant-tune')).default;
           // @ts-ignore
           const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
+          // @ts-ignore
+          const Undo = (await import('editorjs-undo')).default;
           console.log('所有插件导入成功');
 
           // 加载保存的内容
@@ -117,12 +119,21 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: savedContent,
-            onReady: () => {
+            onReady: async () => {
               console.log('EditorJS 初始化完成');
               console.log('Editor 实例 isReady:', editorRef.current?.isReady);
+              await editorRef.current.isReady;
+              console.log('EditorJS 完全就绪，开始初始化 Undo');
+              try {
+                // @ts-ignore
+                const undo = new Undo({ editor: editorRef.current });
+                // @ts-ignore
+                undo.initialize();
+                console.log('Undo 插件初始化成功');
+              } catch (undoError) {
+                console.error('Undo 初始化失败:', undoError);
+              }
               initializedRef.current = true;
-              // 临时移除 Undo 以避免错误，后续可重新添加
-              console.log('跳过 Undo 初始化，避免 blocks undefined 错误');
             },
             onChange: (api: any, event: any) => {
               console.log('Editor 内容变化:', event);
@@ -149,8 +160,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               table: Table,
               // @ts-ignore
               quote: Quote,
-              // @ts-ignore
-              embed: Embed,
               // @ts-ignore
               marker: Marker,
               // @ts-ignore
@@ -264,7 +273,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       console.log('Getting editor data...');
       // @ts-ignore
       const outputData = await editorRef.current.save();
-      console.log('Editor data:', outputData);
+      console.log('Editor data saved successfully:', outputData);
       
       console.log('Sending save request...');
       
@@ -285,7 +294,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
         }),
       });
 
-      console.log('Save response:', response.status);
+      console.log('Save response status:', response.status);
       const result = await response.json();
       console.log('Save result:', result);
       
