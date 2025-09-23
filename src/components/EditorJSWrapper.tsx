@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const editorRef = useRef<any>(null);
+  const initializedRef = useRef(false);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -56,9 +57,24 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
     };
     
     const initEditor = async () => {
+      console.log('initEditor 调用次数:', initializedRef.current ? '重复调用' : '首次调用');
+      
+      if (initializedRef.current) {
+        console.log('EditorJS 已初始化，跳过重复初始化');
+        return;
+      }
+      
       console.log('开始初始化 EditorJS');
       console.log('当前 window 对象:', typeof window !== 'undefined');
-      console.log('Editor holder 元素:', document.getElementById('editorjs'));
+      
+      const holderElement = document.getElementById('editorjs');
+      console.log('Editor holder 元素:', holderElement);
+      
+      // 清理 holder 中的现有内容以避免冲突
+      if (holderElement) {
+        holderElement.innerHTML = '';
+        console.log('已清理 holder 内容');
+      }
       
       if (typeof window !== 'undefined') {
         try {
@@ -105,6 +121,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             data: savedContent,
             onReady: () => {
               console.log('EditorJS 初始化完成');
+              initializedRef.current = true;
             },
             onChange: (api, event) => {
               console.log('Editor 内容变化:', event);
@@ -191,13 +208,13 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
     initEditor();
 
     return () => {
-      // @ts-ignore
+      console.log('组件卸载，销毁 EditorJS');
       if (editorRef.current && editorRef.current.destroy) {
-        // @ts-ignore
         editorRef.current.destroy();
       }
+      initializedRef.current = false;
     };
-  }, []);
+  }, [productId]); // 添加 productId 依赖，确保内容变化时重新加载
 
   // @ts-ignore
   const handleSave = async () => {
