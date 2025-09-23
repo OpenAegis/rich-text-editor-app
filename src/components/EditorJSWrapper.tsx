@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const editorRef = useRef<any>(null);
+  const holderRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
   const [isClient, setIsClient] = useState(false);
 
@@ -67,13 +68,16 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       console.log('开始初始化 EditorJS');
       console.log('当前 window 对象:', typeof window !== 'undefined');
       
-      const holderElement = document.getElementById('editorjs');
-      console.log('Editor holder 元素:', holderElement);
+      const holderElement = holderRef.current;
+      console.log('Editor holder 元素 (ref):', holderElement);
       
       // 清理 holder 中的现有内容以避免冲突
       if (holderElement) {
         holderElement.innerHTML = '';
         console.log('已清理 holder 内容');
+      } else {
+        console.error('holderRef.current 为 null，无法初始化');
+        return;
       }
       
       if (typeof window !== 'undefined') {
@@ -113,15 +117,22 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const savedContent = await loadSavedContent();
           console.log('Loaded content:', savedContent);
 
-          console.log('创建 EditorJS 实例前，holder 检查:', document.getElementById('editorjs'));
-          
-          // @ts-ignore
-          editorRef.current = new EditorJS({
-            holder: 'editorjs',
+          const editorConfig = {
+            holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: savedContent,
             onReady: () => {
               console.log('EditorJS 初始化完成');
               initializedRef.current = true;
+              // 在 onReady 中延迟初始化 Undo
+              try {
+                // @ts-ignore
+                const undo = new Undo({ editor: editorRef.current });
+                // @ts-ignore
+                undo.initialize();
+                console.log('Undo 插件初始化成功');
+              } catch (undoError) {
+                console.error('Undo 初始化失败:', undoError);
+              }
             },
             onChange: (api, event) => {
               console.log('Editor 内容变化:', event);
@@ -188,15 +199,16 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               },
             },
             placeholder: '在这里编写富文本内容...'
-          });
+          };
+          
+          console.log('EditorJS 配置对象:', editorConfig);
+          console.log('配置中的 holder:', editorConfig.holder);
+          
+          // @ts-ignore
+          editorRef.current = new EditorJS(editorConfig);
 
           console.log('EditorJS 实例创建成功:', editorRef.current);
 
-          // @ts-ignore
-          const undo = new Undo({ editor: editorRef.current });
-          // @ts-ignore
-          undo.initialize();
-          console.log('Undo 插件初始化成功');
         } catch (error) {
           console.error('EditorJS 初始化失败:', error);
         }
@@ -205,9 +217,13 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       }
     };
 
-    initEditor();
+    // 延迟初始化，确保 ref 已设置
+    const timeoutId = setTimeout(() => {
+      initEditor();
+    }, 100);
 
     return () => {
+      clearTimeout(timeoutId);
       console.log('组件卸载，销毁 EditorJS');
       if (editorRef.current && editorRef.current.destroy) {
         editorRef.current.destroy();
@@ -314,12 +330,12 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   };
 
   if (!isClient) {
-    return <div id="editorjs" style={{ border: '1px solid #ccc', minHeight: '300px' }}>加载中...</div>;
+    return <div ref={holderRef} style={{ border: '1px solid #ccc', minHeight: '300px' }}>加载中...</div>;
   }
 
   return (
     <div>
-      <div id="editorjs" style={{ border: '1px solid #ccc', minHeight: '300px' }}></div>
+      <div ref={holderRef} style={{ border: '1px solid #ccc', minHeight: '300px' }}></div>
       <button onClick={handleSave} style={{ marginTop: '10px', padding: '10px 20px' }}>
         保存富文本内容
       </button>
