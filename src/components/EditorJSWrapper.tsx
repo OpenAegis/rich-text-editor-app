@@ -134,7 +134,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 console.error('Undo 初始化失败:', undoError);
               }
             },
-            onChange: (api, event) => {
+            onChange: (api: any, event: any) => {
               console.log('Editor 内容变化:', event);
             },
             tools: {
