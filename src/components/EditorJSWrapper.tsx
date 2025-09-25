@@ -137,6 +137,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: data,
+            inlineToolbar: ['Color', 'Marker'], // 全局启用inline tools
             onReady: async () => {
               console.log('EditorJS 初始化完成');
               console.log('Editor 实例:', editorRef.current);
@@ -146,18 +147,17 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               } else {
                 console.warn('Editor isReady not available, skipping await');
               }
-              // 手动修复config传递问题
+              // 检查inlineToolbar API
+              if (editorRef.current && editorRef.current.api && editorRef.current.api.inlineToolbar) {
+                console.log('InlineToolbar API available:', typeof editorRef.current.api.inlineToolbar);
+                console.log('InlineToolbar config:', editorRef.current.api.inlineToolbar);
+              }
+              // 增强日志检查tools结构
               if (editorRef.current && editorRef.current.tools) {
-                if (editorRef.current.tools.Color && !editorRef.current.tools.Color.config) {
-                  editorRef.current.tools.Color.config = editorConfig.tools.Color.config;
-                  console.log('Manually set Color config:', editorRef.current.tools.Color.config);
-                }
-                if (editorRef.current.tools.Marker && !editorRef.current.tools.Marker.config) {
-                  editorRef.current.tools.Marker.config = editorConfig.tools.Marker.config;
-                  console.log('Manually set Marker config:', editorRef.current.tools.Marker.config);
-                }
-                console.log('After init, Color tool config:', editorRef.current.tools.Color?.config);
-                console.log('After init, Marker tool config:', editorRef.current.tools.Marker?.config);
+                console.log('Tools Color type:', typeof editorRef.current.tools.Color);
+                console.log('Tools Color keys:', Object.keys(editorRef.current.tools.Color || {}));
+                console.log('Tools Marker type:', typeof editorRef.current.tools.Marker);
+                console.log('Tools Marker keys:', Object.keys(editorRef.current.tools.Marker || {}));
               }
               console.log('EditorJS 完全就绪');
               initializedRef.current = true;
@@ -193,43 +193,35 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               underline: Underline,
               // @ts-ignore
               inlineCode: InlineCode,
-              // @ts-ignore
               Color: {
                 class: ColorPlugin,
                 config: {
                   colorCollections: [
-                    '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
-                    '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
-                    '#EC7878','#9C27B0','#673AB7','#3F51B5',
-                    '#0070FF','#03A9F4','#00BCD4','#4CAF50',
-                    '#8BC34A','#CDDC39','#FFEB3B','#FFC107',
-                    '#FF9800','#FF5722','#795548','#9E9E9E'
+                    '#EC7878',
+                    '#9C27B0',
+                    '#673AB7',
+                    '#3F51B5',
+                    '#0070F3',
+                    '#03A9F4',
+                    '#00BCD4',
+                    '#4CAF50',
+                    '#8BC34A',
+                    '#CDDC39',
+                    '#FFF',
+                    '#000'
                   ],
-                  defaultColor: '#000000',
+                  defaultColor: '#FF1300',
                   type: 'text',
-                  customPicker: true
                 }
               },
-              // @ts-ignore
-              Marker: {
-                class: ColorPlugin,
-                config: {
-                  colorCollections: [
-                    '#FFFF00', '#00FF00', '#FF00FF', '#00FFFF',
-                    '#FFA500', '#FFB6C1', '#98FB98', '#87CEEB'
-                  ],
-                  defaultColor: '#FFFF00',
-                  type: 'marker',
-                  customPicker: true
-                }
-              },
+              Marker: Marker,
             },
             placeholder: '在这里编写富文本内容...'
           };
           
           // 添加日志检查配置阶段的工具配置
           console.log('Config stage, Color tool config:', editorConfig.tools.Color.config);
-          console.log('Config stage, Marker tool config:', editorConfig.tools.Marker.config);
+          console.log('Config stage, Marker tool:', editorConfig.tools.Marker);
 
           console.log('EditorConfig keys:', Object.keys(editorConfig));
           console.log('当前配置的tools:', Object.keys(editorConfig.tools));
