@@ -201,10 +201,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               }
               // 增强日志检查tools结构
               if (editorRef.current && editorRef.current.tools) {
-                console.log('Tools Color type:', typeof editorRef.current.tools.Color);
-                console.log('Tools Color keys:', Object.keys(editorRef.current.tools.Color || {}));
-                console.log('Tools Marker type:', typeof editorRef.current.tools.Marker);
-                console.log('Tools Marker keys:', Object.keys(editorRef.current.tools.Marker || {}));
+                console.log('Tools color type:', typeof editorRef.current.tools.color);
+                console.log('Tools color keys:', Object.keys(editorRef.current.tools.color || {}));
+                console.log('Tools marker type:', typeof editorRef.current.tools.marker);
+                console.log('Tools marker keys:', Object.keys(editorRef.current.tools.marker || {}));
               }
               console.log('EditorJS 完全就绪');
               initializedRef.current = true;
@@ -322,8 +322,8 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           };
           
           // 添加日志检查配置阶段的工具配置
-          console.log('Config stage, Color tool config:', editorConfig.tools.Color.config);
-          console.log('Config stage, Marker tool:', editorConfig.tools.Marker);
+          console.log('Config stage, color tool config:', editorConfig.tools.color.config);
+          console.log('Config stage, marker tool:', editorConfig.tools.marker);
 
           console.log('EditorConfig keys:', Object.keys(editorConfig));
           console.log('当前配置的tools:', Object.keys(editorConfig.tools));
