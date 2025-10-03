@@ -121,8 +121,53 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           // @ts-ignore
           const Undo = (await import('editorjs-undo')).default;
           console.log('Undo imported:', typeof Undo);
+          // @ts-ignore
+          const Checklist = (await import('@editorjs/checklist')).default;
+          console.log('Checklist imported:', typeof Checklist);
+          // @ts-ignore
+          const Code = (await import('@editorjs/code')).default;
+          console.log('Code imported:', typeof Code);
+          // @ts-ignore
+          const CodeBox = (await import('@bomdi/codebox')).default;
+          console.log('CodeBox imported:', typeof CodeBox);
+          // @ts-ignore
+          const Delimiter = (await import('@editorjs/delimiter')).default;
+          console.log('Delimiter imported:', typeof Delimiter);
+          // @ts-ignore
+          const Warning = (await import('@editorjs/warning')).default;
+          console.log('Warning imported:', typeof Warning);
+          // @ts-ignore
+          const LinkTool = (await import('@editorjs/link')).default;
+          console.log('LinkTool imported:', typeof LinkTool);
+          // @ts-ignore
+          const Raw = (await import('@editorjs/raw')).default;
+          console.log('Raw imported:', typeof Raw);
+          // @ts-ignore
+          const SimpleImage = (await import('@editorjs/simple-image')).default;
+          console.log('SimpleImage imported:', typeof SimpleImage);
+          // @ts-ignore
+          const Attaches = (await import('@editorjs/attaches')).default;
+          console.log('Attaches imported:', typeof Attaches);
+          // @ts-ignore
+          const NestedList = (await import('@editorjs/nested-list')).default;
+          console.log('NestedList imported:', typeof NestedList);
+          // @ts-ignore
+          const Alert = (await import('editorjs-alert')).default;
+          console.log('Alert imported:', typeof Alert);
+          // @ts-ignore
+          const Button = (await import('editorjs-button')).default;
+          console.log('Button imported:', typeof Button);
+          // @ts-ignore
+          const ToggleBlock = (await import('editorjs-toggle-block')).default;
+          console.log('ToggleBlock imported:', typeof ToggleBlock);
+          // @ts-ignore
+          const AlignmentTune = (await import('editorjs-text-alignment-blocktune')).default;
+          console.log('AlignmentTune imported:', typeof AlignmentTune);
+          // @ts-ignore
+          const DragDrop = (await import('editorjs-drag-drop')).default;
+          console.log('DragDrop imported:', typeof DragDrop);
           console.log('所有插件导入成功');
-            console.log('导入的工具组件:', { Header, List, Image, Table, Quote, Embed, Marker, Underline, InlineCode, ColorPlugin, Undo });
+            console.log('导入的工具组件:', { Header, List, Image, Table, Quote, Embed, Marker, Underline, InlineCode, ColorPlugin, Undo, Checklist, Code, CodeBox, Delimiter, Warning, LinkTool, Raw, SimpleImage, Attaches, NestedList, Alert, Button, ToggleBlock, AlignmentTune, DragDrop });
 
           // 加载保存的内容
           const savedContent = await loadSavedContent();
@@ -137,8 +182,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: data,
-            inlineToolbar: ['Color', 'Marker'], // 全局启用inline tools
+            inlineToolbar: ['Color', 'Marker', 'underline', 'inlineCode'], // 全局启用inline tools
             onReady: async () => {
+              // 初始化拖拽功能
+              new DragDrop(editorRef.current);
               console.log('EditorJS 初始化完成');
               console.log('Editor 实例:', editorRef.current);
               console.log('Editor 实例 isReady:', editorRef.current?.isReady);
@@ -171,6 +218,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               // @ts-ignore
               list: List,
               // @ts-ignore
+              nestedList: NestedList,
+              // @ts-ignore
+              checklist: Checklist,
+              // @ts-ignore
               image: {
                 class: Image,
                 config: {
@@ -184,15 +235,60 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 }
               },
               // @ts-ignore
+              simpleImage: SimpleImage,
+              // @ts-ignore
               table: Table,
               // @ts-ignore
               quote: Quote,
+              // @ts-ignore
+              code: Code,
+              // @ts-ignore
+              codeBox: {
+                class: CodeBox,
+                config: {
+                  themeURL: 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/styles/dracula.min.css',
+                  themeName: 'atom-one-dark',
+                  useDefaultTheme: 'light',
+                }
+              },
+              // @ts-ignore
+              delimiter: Delimiter,
+              // @ts-ignore
+              warning: Warning,
+              // @ts-ignore
+              linkTool: {
+                class: LinkTool,
+                config: {
+                  endpoint: '/api/fetch-url',
+                }
+              },
+              // @ts-ignore
+              raw: Raw,
+              // @ts-ignore
+              attaches: {
+                class: Attaches,
+                config: {
+                  endpoint: '/api/upload-file',
+                  additionalRequestHeaders: {
+                    'Authorization': `Bearer ${appBridge.getState().token}`,
+                  }
+                }
+              },
+              // @ts-ignore
+              embed: Embed,
+              // @ts-ignore
+              alert: Alert,
+              // @ts-ignore
+              button: Button,
+              // @ts-ignore
+              toggle: ToggleBlock,
               // @ts-ignore
               marker: Marker,
               // @ts-ignore
               underline: Underline,
               // @ts-ignore
               inlineCode: InlineCode,
+              // @ts-ignore
               Color: {
                 class: ColorPlugin,
                 config: {
@@ -214,7 +310,15 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                   type: 'text',
                 }
               },
+              // @ts-ignore
               Marker: Marker,
+              // @ts-ignore
+              alignmentTune: {
+                class: AlignmentTune,
+                config: {
+                  default: "left",
+                }
+              },
             },
             placeholder: '在这里编写富文本内容...'
           };
@@ -231,9 +335,9 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             toolsKeys: Object.keys(editorConfig.tools),
             placeholder: editorConfig.placeholder
           });
-          
-          // @ts-ignore
+
           try {
+            // @ts-ignore - EditorJS 类型兼容性问题
             editorRef.current = new EditorJS(editorConfig);
           } catch (initError) {
             console.error('EditorJS new 失败:', initError);

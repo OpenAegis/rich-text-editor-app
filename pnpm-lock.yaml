@@ -92,12 +92,21 @@ importers:
       editorjs-button:
         specifier: ^1.0.0
         version: 1.0.4
+      editorjs-drag-drop:
+        specifier: ^1.1.16
+        version: 1.1.16
+      editorjs-paragraph-with-alignment:
+        specifier: ^3.0.0
+        version: 3.0.0
       editorjs-text-alignment-blocktune:
         specifier: ^1.0.3
         version: 1.0.3
       editorjs-text-color-plugin:
         specifier: ^2.0.4
         version: 2.0.4
+      editorjs-toggle-block:
+        specifier: ^0.3.16
+        version: 0.3.16
       editorjs-undo:
         specifier: ^2.0.28
         version: 2.0.28
@@ -2949,11 +2958,20 @@ packages:
   editorjs-button@1.0.4:
     resolution: {integrity: sha512-3wn8VrcGgil0gCTrgJNktiYnsC8YdS1TueNOyWr2geZLSUE9KPSVyQpPAduCdVEy+wbWQqrftczENNdLpxDGsQ==}
 
+  editorjs-drag-drop@1.1.16:
+    resolution: {integrity: sha512-yOyKZqqZepkdbDQbAw1bZr3mQewkT4a9QgufWW3Aoy1qcTka8uHR01T/dGHqrpyYrF56ykyidPyp0LX79LEHHQ==}
+
+  editorjs-paragraph-with-alignment@3.0.0:
+    resolution: {integrity: sha512-vSjjB/KUECEBxYqbj9yn1L799L14n0uoKrvk5qfaAokIHB8mYg5hZ8mOTtoS2cJu+xE3QZ/jmHY/Fh0EJeM8ZQ==}
+
   editorjs-text-alignment-blocktune@1.0.3:
     resolution: {integrity: sha512-DAJ2LJP+WjETvU4lVOJCqZ1kZkKHp0GkujkqZgza9DRv7bO46m1M/s2d5Ba5hPFdmqk1vA/ci++MQXgWD7mWYw==}
 
   editorjs-text-color-plugin@2.0.4:
     resolution: {integrity: sha512-QpibTkOxs3ndlKNOLT8ZlC4ktc3/eKIajiLO0Jm/hh9AJug/CrM1/rAvHy+ldfUKavbWeI+YZvgjad0YTyoyGw==}
+
+  editorjs-toggle-block@0.3.16:
+    resolution: {integrity: sha512-vjLE0bTF2HcQ7gQdgQ4c+Dl0n2o+oA0JICseJSYkQluDIE+LA9oHfTAE8ziJr03oeya7iVQ/b+d21Ez5hKsVsw==}
 
   editorjs-undo@2.0.28:
     resolution: {integrity: sha512-7MiLdjIsPOXn8+cHDeAt2HapVklg4vcLWWkd2eMMlGI6UVtwYSjdQquDSv9752B/fOEP1C3NMF2sdiCoZV3tTA==}
@@ -5077,6 +5095,10 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
 
   value-or-promise@1.0.12:
     resolution: {integrity: sha512-Z6Uz+TYwEqE7ZN50gwn+1LCVo9ZVrpxRPOhOLnncYkY1ZzOYtrX8Fwf/rFktZ8R5mJms6EZf5TqNOMeZmnPq9Q==}
@@ -8511,9 +8533,17 @@ snapshots:
 
   editorjs-button@1.0.4: {}
 
+  editorjs-drag-drop@1.1.16: {}
+
+  editorjs-paragraph-with-alignment@3.0.0: {}
+
   editorjs-text-alignment-blocktune@1.0.3: {}
 
   editorjs-text-color-plugin@2.0.4: {}
+
+  editorjs-toggle-block@0.3.16:
+    dependencies:
+      uuid: 9.0.1
 
   editorjs-undo@2.0.28:
     dependencies:
@@ -11034,6 +11064,8 @@ snapshots:
       '@types/react': 18.3.24
 
   util-deprecate@1.0.2: {}
+
+  uuid@9.0.1: {}
 
   value-or-promise@1.0.12: {}
 
