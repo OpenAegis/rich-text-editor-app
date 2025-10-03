@@ -200,11 +200,16 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 console.log('InlineToolbar config:', editorRef.current.api.inlineToolbar);
               }
               // 增强日志检查tools结构
-              if (editorRef.current && editorRef.current.tools) {
-                console.log('Tools color type:', typeof editorRef.current.tools.color);
-                console.log('Tools color keys:', Object.keys(editorRef.current.tools.color || {}));
-                console.log('Tools marker type:', typeof editorRef.current.tools.marker);
-                console.log('Tools marker keys:', Object.keys(editorRef.current.tools.marker || {}));
+              if (editorRef.current) {
+                console.log('Editor configuration:', editorRef.current.configuration);
+                console.log('Editor configuration tools:', editorRef.current.configuration?.tools);
+                if (editorRef.current.configuration?.tools?.color) {
+                  console.log('Configuration color tool:', editorRef.current.configuration.tools.color);
+                }
+                if (editorRef.current.tools) {
+                  console.log('Tools object:', editorRef.current.tools);
+                  console.log('Tools keys:', Object.keys(editorRef.current.tools));
+                }
               }
               console.log('EditorJS 完全就绪');
               initializedRef.current = true;
