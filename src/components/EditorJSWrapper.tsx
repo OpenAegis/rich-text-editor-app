@@ -289,7 +289,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               // @ts-ignore
               inlineCode: InlineCode,
               // @ts-ignore
-              Color: {
+              color: {
                 class: ColorPlugin,
                 config: {
                   colorCollections: [
@@ -310,8 +310,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                   type: 'text',
                 }
               },
-              // @ts-ignore
-              Marker: Marker,
               // @ts-ignore
               alignmentTune: {
                 class: AlignmentTune,
