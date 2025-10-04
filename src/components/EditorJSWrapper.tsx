@@ -6,8 +6,12 @@ import { useEffect, useRef, useState } from 'react';
 const createColorPluginWrapper = (ColorPlugin: any, config: any) => {
   return class ColorPluginWrapper extends ColorPlugin {
     constructor(args: any) {
+      console.log('ColorPluginWrapper constructor called with args:', args);
+      console.log('Injecting config:', config);
       // Manually inject the config into the constructor args
-      super({ ...args, config });
+      const mergedArgs = { ...args, config };
+      console.log('Merged args:', mergedArgs);
+      super(mergedArgs);
     }
   };
 };
