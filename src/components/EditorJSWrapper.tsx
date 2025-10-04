@@ -7,10 +7,12 @@ const createColorPluginWrapper = (ColorPlugin: any, config: any) => {
   return class ColorPluginWrapper extends ColorPlugin {
     constructor(args: any) {
       console.log('ColorPluginWrapper constructor called with args:', args);
-      console.log('Injecting config:', config);
-      // Manually inject the config into the constructor args
-      const mergedArgs = { ...args, config };
-      console.log('Merged args:', mergedArgs);
+      console.log('args.config type:', typeof args.config);
+      console.log('args.config value:', args.config);
+      console.log('Hardcoded config:', config);
+      // Use the passed config if available, otherwise use our hardcoded one
+      const mergedArgs = { ...args, config: args.config || config };
+      console.log('Final merged args:', mergedArgs);
       super(mergedArgs);
     }
   };
