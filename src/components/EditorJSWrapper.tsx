@@ -115,6 +115,9 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const InlineCode = (await import('@editorjs/inline-code')).default;
           console.log('InlineCode imported:', typeof InlineCode);
           // @ts-ignore
+          const CustomColorTool = (await import('./CustomColorTool')).default;
+          console.log('CustomColorTool imported:', typeof CustomColorTool);
+          // @ts-ignore
           const Undo = (await import('editorjs-undo')).default;
           console.log('Undo imported:', typeof Undo);
           // @ts-ignore
@@ -178,7 +181,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: data,
-            inlineToolbar: ['marker', 'underline', 'inlineCode'], // 全局启用inline tools
+            inlineToolbar: ['color', 'marker', 'underline', 'inlineCode'], // 全局启用inline tools
             onReady: async () => {
               // 初始化拖拽功能
               new DragDrop(editorRef.current);
@@ -279,6 +282,31 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               underline: Underline,
               // @ts-ignore
               inlineCode: InlineCode,
+              // @ts-ignore
+              color: {
+                class: CustomColorTool,
+                config: {
+                  colorCollections: [
+                    '#EC7878',
+                    '#9C27B0',
+                    '#673AB7',
+                    '#3F51B5',
+                    '#0070F3',
+                    '#03A9F4',
+                    '#00BCD4',
+                    '#4CAF50',
+                    '#8BC34A',
+                    '#CDDC39',
+                    '#FFC107',
+                    '#FF5722',
+                    '#795548',
+                    '#607D8B',
+                    '#000000',
+                    '#FFFFFF'
+                  ],
+                  defaultColor: '#FF1300',
+                }
+              },
               // @ts-ignore
               alignmentTune: {
                 class: AlignmentTune,
