@@ -6,14 +6,11 @@ import { useEffect, useRef, useState } from 'react';
 const createColorPluginWrapper = (ColorPlugin: any, config: any) => {
   return class ColorPluginWrapper extends ColorPlugin {
     constructor(args: any) {
-      console.log('ColorPluginWrapper constructor called with args:', args);
-      console.log('args.config type:', typeof args.config);
-      console.log('args.config value:', args.config);
-      console.log('Hardcoded config:', config);
-      // Use the passed config if available, otherwise use our hardcoded one
-      const mergedArgs = { ...args, config: args.config || config };
-      console.log('Final merged args:', mergedArgs);
-      super(mergedArgs);
+      // Check if config is empty object (EditorJS 2.20+ bug)
+      const hasValidConfig = args.config && Object.keys(args.config).length > 0;
+      const finalConfig = hasValidConfig ? args.config : config;
+      console.log('Using config:', finalConfig);
+      super({ ...args, config: finalConfig });
     }
   };
 };
