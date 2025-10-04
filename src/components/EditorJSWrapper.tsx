@@ -5,12 +5,16 @@ import { useEffect, useRef, useState } from 'react';
 // Create a wrapper class that hardcodes the config
 const createColorPluginWrapper = (ColorPlugin: any, config: any) => {
   return class ColorPluginWrapper extends ColorPlugin {
+    config: any;
+
     constructor(args: any) {
       // Check if config is empty object (EditorJS 2.20+ bug)
       const hasValidConfig = args.config && Object.keys(args.config).length > 0;
       const finalConfig = hasValidConfig ? args.config : config;
       console.log('Using config:', finalConfig);
       super({ ...args, config: finalConfig });
+      // Also set as instance property in case the plugin accesses this.config
+      this.config = finalConfig;
     }
   };
 };
