@@ -1,24 +1,6 @@
 // @ts-ignore
 import { useEffect, useRef, useState } from 'react';
 
-// Workaround for EditorJS 2.20+ bug where config is not passed to inline tools
-// Create a wrapper class that hardcodes the config
-const createColorPluginWrapper = (ColorPlugin: any, config: any) => {
-  return class ColorPluginWrapper extends ColorPlugin {
-    config: any;
-
-    constructor(args: any) {
-      // Check if config is empty object (EditorJS 2.20+ bug)
-      const hasValidConfig = args.config && Object.keys(args.config).length > 0;
-      const finalConfig = hasValidConfig ? args.config : config;
-      console.log('Using config:', finalConfig);
-      super({ ...args, config: finalConfig });
-      // Also set as instance property in case the plugin accesses this.config
-      this.config = finalConfig;
-    }
-  };
-};
-
 const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const editorRef = useRef<any>(null);
   const holderRef = useRef<HTMLDivElement>(null);
@@ -132,30 +114,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           // @ts-ignore
           const InlineCode = (await import('@editorjs/inline-code')).default;
           console.log('InlineCode imported:', typeof InlineCode);
-          // Remove TextVariantTune import
-          // @ts-ignore
-          const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
-          console.log('ColorPlugin imported:', typeof ColorPlugin);
-
-          // Create wrapper with config due to EditorJS 2.20+ bug
-          const ColorPluginWithConfig = createColorPluginWrapper(ColorPlugin, {
-            colorCollections: [
-              '#EC7878',
-              '#9C27B0',
-              '#673AB7',
-              '#3F51B5',
-              '#0070F3',
-              '#03A9F4',
-              '#00BCD4',
-              '#4CAF50',
-              '#8BC34A',
-              '#CDDC39',
-              '#FFF',
-              '#000'
-            ],
-            defaultColor: '#FF1300',
-            type: 'text',
-          });
           // @ts-ignore
           const Undo = (await import('editorjs-undo')).default;
           console.log('Undo imported:', typeof Undo);
@@ -205,7 +163,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const DragDrop = (await import('editorjs-drag-drop')).default;
           console.log('DragDrop imported:', typeof DragDrop);
           console.log('所有插件导入成功');
-            console.log('导入的工具组件:', { Header, List, Image, Table, Quote, Embed, Marker, Underline, InlineCode, ColorPlugin, Undo, Checklist, Code, CodeBox, Delimiter, Warning, LinkTool, Raw, SimpleImage, Attaches, NestedList, Alert, Button, ToggleBlock, AlignmentTune, DragDrop });
+            console.log('导入的工具组件:', { Header, List, Image, Table, Quote, Embed, Marker, Underline, InlineCode, Undo, Checklist, Code, CodeBox, Delimiter, Warning, LinkTool, Raw, SimpleImage, Attaches, NestedList, Alert, Button, ToggleBlock, AlignmentTune, DragDrop });
 
           // 加载保存的内容
           const savedContent = await loadSavedContent();
@@ -220,7 +178,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: data,
-            inlineToolbar: ['color', 'marker', 'underline', 'inlineCode'], // 全局启用inline tools
+            inlineToolbar: ['marker', 'underline', 'inlineCode'], // 全局启用inline tools
             onReady: async () => {
               // 初始化拖拽功能
               new DragDrop(editorRef.current);
@@ -237,18 +195,8 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 console.log('InlineToolbar API available:', typeof editorRef.current.api.inlineToolbar);
                 console.log('InlineToolbar config:', editorRef.current.api.inlineToolbar);
               }
-              // 增强日志检查tools结构
-              if (editorRef.current) {
-                console.log('Editor configuration:', editorRef.current.configuration);
-                console.log('Editor configuration tools:', editorRef.current.configuration?.tools);
-                if (editorRef.current.configuration?.tools?.color) {
-                  console.log('Configuration color tool:', editorRef.current.configuration.tools.color);
-                }
-                if (editorRef.current.tools) {
-                  console.log('Tools object:', editorRef.current.tools);
-                  console.log('Tools keys:', Object.keys(editorRef.current.tools));
-                }
-              }
+              // Editor ready
+              console.log('Editor configuration:', editorRef.current?.configuration);
               console.log('EditorJS 完全就绪');
               initializedRef.current = true;
             },
@@ -332,8 +280,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               // @ts-ignore
               inlineCode: InlineCode,
               // @ts-ignore
-              color: ColorPluginWithConfig,
-              // @ts-ignore
               alignmentTune: {
                 class: AlignmentTune,
                 config: {
@@ -343,10 +289,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             },
             placeholder: '在这里编写富文本内容...'
           };
-
-          // 添加日志检查配置阶段的工具配置
-          console.log('Config stage, color tool:', editorConfig.tools.color);
-          console.log('Config stage, marker tool:', editorConfig.tools.marker);
 
           console.log('EditorConfig keys:', Object.keys(editorConfig));
           console.log('当前配置的tools:', Object.keys(editorConfig.tools));
