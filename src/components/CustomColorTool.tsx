@@ -204,7 +204,7 @@ export default class CustomColorTool {
       return false;
     }
 
-    return element.tagName === this.tag && element.style.color !== '';
+    return element.tagName === this.tag && (element as HTMLElement).style.color !== '';
   }
 
   /**
