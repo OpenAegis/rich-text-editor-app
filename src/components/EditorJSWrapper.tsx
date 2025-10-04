@@ -1,6 +1,30 @@
 // @ts-ignore
 import { useEffect, useRef, useState } from 'react';
 
+// Workaround for EditorJS 2.20+ bug where config is not passed to inline tools
+// Create a wrapper class that hardcodes the config
+const createColorPluginWrapper = (ColorPlugin: any, config: any) => {
+  return class ColorPluginWrapper {
+    constructor(args: any) {
+      // Manually inject the config into the constructor args
+      return new ColorPlugin({ ...args, config });
+    }
+
+    // Forward all static properties
+    static get isInline() {
+      return ColorPlugin.isInline;
+    }
+
+    static get sanitize() {
+      return ColorPlugin.sanitize;
+    }
+
+    static get title() {
+      return ColorPlugin.title;
+    }
+  };
+};
+
 const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const editorRef = useRef<any>(null);
   const holderRef = useRef<HTMLDivElement>(null);
@@ -118,6 +142,26 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           // @ts-ignore
           const ColorPlugin = (await import('editorjs-text-color-plugin')).default;
           console.log('ColorPlugin imported:', typeof ColorPlugin);
+
+          // Create wrapper with config due to EditorJS 2.20+ bug
+          const ColorPluginWithConfig = createColorPluginWrapper(ColorPlugin, {
+            colorCollections: [
+              '#EC7878',
+              '#9C27B0',
+              '#673AB7',
+              '#3F51B5',
+              '#0070F3',
+              '#03A9F4',
+              '#00BCD4',
+              '#4CAF50',
+              '#8BC34A',
+              '#CDDC39',
+              '#FFF',
+              '#000'
+            ],
+            defaultColor: '#FF1300',
+            type: 'text',
+          });
           // @ts-ignore
           const Undo = (await import('editorjs-undo')).default;
           console.log('Undo imported:', typeof Undo);
@@ -294,27 +338,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               // @ts-ignore
               inlineCode: InlineCode,
               // @ts-ignore
-              color: {
-                class: ColorPlugin,
-                config: {
-                  colorCollections: [
-                    '#EC7878',
-                    '#9C27B0',
-                    '#673AB7',
-                    '#3F51B5',
-                    '#0070F3',
-                    '#03A9F4',
-                    '#00BCD4',
-                    '#4CAF50',
-                    '#8BC34A',
-                    '#CDDC39',
-                    '#FFF',
-                    '#000'
-                  ],
-                  defaultColor: '#FF1300',
-                  type: 'text',
-                }
-              },
+              color: ColorPluginWithConfig,
               // @ts-ignore
               alignmentTune: {
                 class: AlignmentTune,
@@ -325,9 +349,9 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             },
             placeholder: '在这里编写富文本内容...'
           };
-          
+
           // 添加日志检查配置阶段的工具配置
-          console.log('Config stage, color tool config:', editorConfig.tools.color.config);
+          console.log('Config stage, color tool:', editorConfig.tools.color);
           console.log('Config stage, marker tool:', editorConfig.tools.marker);
 
           console.log('EditorConfig keys:', Object.keys(editorConfig));
