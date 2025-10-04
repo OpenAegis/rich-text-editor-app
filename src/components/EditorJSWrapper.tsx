@@ -4,23 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 // Workaround for EditorJS 2.20+ bug where config is not passed to inline tools
 // Create a wrapper class that hardcodes the config
 const createColorPluginWrapper = (ColorPlugin: any, config: any) => {
-  return class ColorPluginWrapper {
+  return class ColorPluginWrapper extends ColorPlugin {
     constructor(args: any) {
       // Manually inject the config into the constructor args
-      return new ColorPlugin({ ...args, config });
-    }
-
-    // Forward all static properties
-    static get isInline() {
-      return ColorPlugin.isInline;
-    }
-
-    static get sanitize() {
-      return ColorPlugin.sanitize;
-    }
-
-    static get title() {
-      return ColorPlugin.title;
+      super({ ...args, config });
     }
   };
 };
