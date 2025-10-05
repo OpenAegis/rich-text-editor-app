@@ -14,6 +14,7 @@ export default function RichEditor() {
   const { appBridge } = useAppBridge();
   const [productId, setProductId] = useState<string | null>(null);
   const [isInIframe, setIsInIframe] = useState(false);
+  const [isEmbedded, setIsEmbedded] = useState(false);
 
   useEffect(() => {
     // 检测是否在 iframe 中
@@ -22,6 +23,9 @@ export default function RichEditor() {
     // 从当前页面URL中直接获取productId参数
     const urlParams = new URLSearchParams(window.location.search);
     const productIdFromUrl = urlParams.get('productId');
+    const embeddedParam = urlParams.get('embedded');
+
+    setIsEmbedded(embeddedParam === 'true');
 
     if (productIdFromUrl) {
       setProductId(productIdFromUrl);
@@ -38,88 +42,115 @@ export default function RichEditor() {
   useEffect(() => {
     if (!isInIframe) return;
 
+    let lastHeight = 0;
+    let debounceTimer: NodeJS.Timeout | null = null;
+
     const sendHeightToParent = () => {
-      const height = document.body.scrollHeight;
+      // 获取编辑器容器的实际高度
+      const editorContainer = document.querySelector('.custom-rich-editor-wrapper') || document.body;
+      const currentHeight = editorContainer.scrollHeight;
+
+      // 只在高度变化超过阈值时才发送（避免微小变化导致的循环）
+      const heightDiff = Math.abs(currentHeight - lastHeight);
+      if (heightDiff < 50) {
+        return;
+      }
+
+      lastHeight = currentHeight;
+
       window.parent.postMessage({
         type: 'resize',
-        height: height
+        height: currentHeight
       }, '*');
+
+      console.log('发送高度到父窗口:', currentHeight);
     };
 
-    // 初始发送
-    sendHeightToParent();
+    // 防抖函数
+    const debouncedSendHeight = () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      debounceTimer = setTimeout(() => {
+        sendHeightToParent();
+      }, 500); // 500ms 防抖
+    };
 
-    // 使用 ResizeObserver 监听高度变化
+    // 初始发送（延迟一下等待内容渲染）
+    setTimeout(sendHeightToParent, 1000);
+
+    // 使用 ResizeObserver 监听编辑器容器高度变化
     const resizeObserver = new ResizeObserver(() => {
-      sendHeightToParent();
+      debouncedSendHeight();
     });
 
-    resizeObserver.observe(document.body);
-
-    // 使用 MutationObserver 监听 DOM 变化
-    const mutationObserver = new MutationObserver(() => {
-      sendHeightToParent();
-    });
-
-    mutationObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true
-    });
-
-    // 定期检查（备用方案）
-    const interval = setInterval(sendHeightToParent, 1000);
+    // 等待容器渲染后再监听
+    setTimeout(() => {
+      const editorContainer = document.querySelector('.custom-rich-editor-wrapper') || document.body;
+      resizeObserver.observe(editorContainer);
+    }, 500);
 
     return () => {
       resizeObserver.disconnect();
-      mutationObserver.disconnect();
-      clearInterval(interval);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
     };
   }, [isInIframe]);
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{
-        marginBottom: '20px',
-        borderBottom: '1px solid #e0e0e0',
-        paddingBottom: '15px'
-      }}>
+    <div className="custom-rich-editor-wrapper" style={isEmbedded ? {
+      padding: '0',
+      margin: '0',
+      borderBottom: '1px solid #e0e0e0'
+    } : {
+      padding: '20px',
+      maxWidth: '1200px',
+      margin: '0 auto'
+    }}>
+      {!isEmbedded && (
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '15px',
-          marginBottom: '10px'
+          marginBottom: '20px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '15px'
         }}>
-          <button
-            onClick={() => window.history.back()}
-            style={{
-              padding: '8px 12px',
-              backgroundColor: '#f5f5f5',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '14px',
-              color: '#333',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
-            </svg>
-            返回
-          </button>
-          <h2 style={{ margin: 0, color: '#333' }}>商品富文本编辑器</h2>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '15px',
+            marginBottom: '10px'
+          }}>
+            <button
+              onClick={() => window.history.back()}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: '#f5f5f5',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '14px',
+                color: '#333',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+              </svg>
+              返回
+            </button>
+            <h2 style={{ margin: 0, color: '#333' }}>商品富文本编辑器</h2>
+          </div>
+          <div style={{ fontSize: '14px', color: '#666', paddingLeft: '59px' }}>
+            Saleor 富文本编辑器扩展
+          </div>
         </div>
-        <div style={{ fontSize: '14px', color: '#666', paddingLeft: '59px' }}>
-          Saleor 富文本编辑器扩展
-        </div>
-      </div>
-      
+      )}
+
       {productId ? (
         <EditorJSWrapper appBridge={appBridge} productId={productId} />
       ) : (

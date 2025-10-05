@@ -54,8 +54,21 @@
     function createIframeEditor(targetElement, productId) {
         const config = getConfig();
 
+        // 检查是否已经创建过
+        if (targetElement.dataset.richEditorInjected === 'true') {
+            console.log('编辑器已经被替换，跳过');
+            return;
+        }
+
+        // 标记已处理
+        targetElement.dataset.richEditorInjected = 'true';
+
+        // 隐藏原编辑器而不是删除它（保持 React 组件树完整）
+        targetElement.style.display = 'none';
+
         // 创建容器
         const container = document.createElement('div');
+        container.className = 'custom-rich-editor-container';
         container.style.cssText = `
             position: relative;
             width: 100%;
@@ -64,53 +77,101 @@
             border-radius: 4px;
             overflow: hidden;
             background: white;
+            margin-bottom: 16px;
         `;
 
         // 创建 iframe
         const iframe = document.createElement('iframe');
+        iframe.className = 'custom-rich-editor-iframe';
         iframe.style.cssText = `
             width: 100%;
             height: 400px;
             border: none;
             display: block;
+            transition: height 0.3s ease;
         `;
-        iframe.src = `${config.editorServerUrl}/rich-editor?productId=${encodeURIComponent(productId)}`;
+        iframe.src = `${config.editorServerUrl}/rich-editor?productId=${encodeURIComponent(productId)}&embedded=true`;
 
         container.appendChild(iframe);
 
+        // 获取配置的服务器 origin
+        let serverOrigin;
+        try {
+            serverOrigin = new URL(config.editorServerUrl).origin;
+        } catch (e) {
+            console.error('无效的服务器地址:', config.editorServerUrl);
+            return;
+        }
+
+        // 防抖计时器
+        let resizeDebounceTimer = null;
+        let lastIframeHeight = 400;
+
         // 监听来自 iframe 的消息
-        window.addEventListener('message', function(event) {
-            // 验证消息来源
-            if (event.origin !== config.editorServerUrl.replace(/\/$/, '')) {
+        const messageHandler = function(event) {
+            // 宽松的来源验证：检查是否来自配置的服务器或本地开发环境
+            const isValidOrigin = event.origin === serverOrigin ||
+                                 event.origin.startsWith('http://localhost') ||
+                                 event.origin.startsWith('http://127.0.0.1') ||
+                                 event.origin.startsWith('https://localhost');
+
+            if (!isValidOrigin) {
+                // 静默忽略无效来源的消息
                 return;
             }
 
             const data = event.data;
 
+            // 只处理有效的消息类型
+            if (!data || typeof data !== 'object' || !data.type) {
+                return;
+            }
+
+            console.log('收到来自编辑器的消息:', data);
+
             // 处理高度变化
-            if (data.type === 'resize' && data.height) {
-                iframe.style.height = data.height + 'px';
-                console.log('iframe 高度已调整:', data.height);
+            if (data.type === 'resize' && typeof data.height === 'number') {
+                // 清除之前的防抖计时器
+                if (resizeDebounceTimer) {
+                    clearTimeout(resizeDebounceTimer);
+                }
+
+                // 防抖：300ms 内多次调整只执行最后一次
+                resizeDebounceTimer = setTimeout(() => {
+                    // 最小高度 400px，使用实际高度（不添加额外缓冲）
+                    const newHeight = Math.max(400, data.height);
+
+                    // 只在高度真正变化时才调整
+                    if (Math.abs(newHeight - lastIframeHeight) > 10) {
+                        lastIframeHeight = newHeight;
+                        iframe.style.height = newHeight + 'px';
+                        console.log('✓ iframe 高度已调整:', newHeight + 'px');
+                    }
+                }, 300);
             }
 
             // 处理内容保存
             if (data.type === 'contentSaved') {
-                console.log('内容已保存:', data.content);
-                // 可以在这里添加额外的处理逻辑
+                console.log('✓ 内容已保存:', data.content);
                 showNotification('内容已保存成功！', 'success');
             }
 
             // 处理错误
             if (data.type === 'error') {
-                console.error('编辑器错误:', data.message);
+                console.error('✗ 编辑器错误:', data.message);
                 showNotification('错误: ' + data.message, 'error');
             }
-        });
+        };
 
-        // 替换原有编辑器
-        targetElement.parentNode.replaceChild(container, targetElement);
+        window.addEventListener('message', messageHandler);
 
-        console.log('富文本编辑器已加载:', config.editorServerUrl);
+        // 在原编辑器后插入新编辑器（而不是替换）
+        if (targetElement.parentNode) {
+            targetElement.parentNode.insertBefore(container, targetElement.nextSibling);
+        }
+
+        console.log('✓ 富文本编辑器已加载:', config.editorServerUrl);
+        console.log('✓ 监听消息来源:', serverOrigin);
     }
 
     // 显示通知
@@ -141,9 +202,12 @@
         }, 3000);
     }
 
-    // 添加动画样式
+    // 添加动画样式和隐藏默认编辑器的样式
     const style = document.createElement('style');
     style.textContent = `
+        .MuiFormControl-fullWidth {
+            display: none;
+        }
         @keyframes slideIn {
             from {
                 transform: translateX(400px);
