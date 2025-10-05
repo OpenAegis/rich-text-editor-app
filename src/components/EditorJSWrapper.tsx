@@ -478,6 +478,14 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             title: "富文本内容已保存"
           }
         });
+
+        // 如果在 iframe 中，通知父窗口保存成功
+        if (window.self !== window.top) {
+          window.parent.postMessage({
+            type: 'contentSaved',
+            content: outputData
+          }, '*');
+        }
       } else {
         throw new Error(result.message || '保存失败');
       }
@@ -485,7 +493,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       console.error('Save error:', error);
       // @ts-ignore
       appBridge.dispatch({
-        type: "notification", 
+        type: "notification",
         payload: {
           actionId: "save-error",
           status: "error",
@@ -494,6 +502,14 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           text: error.message || '请稍后重试'
         }
       });
+
+      // 如果在 iframe 中，通知父窗口保存失败
+      if (window.self !== window.top) {
+        window.parent.postMessage({
+          type: 'error',
+          message: error.message || '保存失败'
+        }, '*');
+      }
     }
   };
 

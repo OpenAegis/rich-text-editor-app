@@ -13,12 +13,16 @@ export default function RichEditor() {
   // @ts-ignore
   const { appBridge } = useAppBridge();
   const [productId, setProductId] = useState<string | null>(null);
+  const [isInIframe, setIsInIframe] = useState(false);
 
   useEffect(() => {
+    // 检测是否在 iframe 中
+    setIsInIframe(window.self !== window.top);
+
     // 从当前页面URL中直接获取productId参数
     const urlParams = new URLSearchParams(window.location.search);
     const productIdFromUrl = urlParams.get('productId');
-    
+
     if (productIdFromUrl) {
       setProductId(productIdFromUrl);
     } else {
@@ -29,6 +33,49 @@ export default function RichEditor() {
       }
     }
   }, []);
+
+  // 监听页面高度变化并通知父窗口
+  useEffect(() => {
+    if (!isInIframe) return;
+
+    const sendHeightToParent = () => {
+      const height = document.body.scrollHeight;
+      window.parent.postMessage({
+        type: 'resize',
+        height: height
+      }, '*');
+    };
+
+    // 初始发送
+    sendHeightToParent();
+
+    // 使用 ResizeObserver 监听高度变化
+    const resizeObserver = new ResizeObserver(() => {
+      sendHeightToParent();
+    });
+
+    resizeObserver.observe(document.body);
+
+    // 使用 MutationObserver 监听 DOM 变化
+    const mutationObserver = new MutationObserver(() => {
+      sendHeightToParent();
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
+
+    // 定期检查（备用方案）
+    const interval = setInterval(sendHeightToParent, 1000);
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      clearInterval(interval);
+    };
+  }, [isInIframe]);
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
