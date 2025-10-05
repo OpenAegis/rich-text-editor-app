@@ -32,16 +32,43 @@ export default function RichEditor() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
+      <div style={{
         marginBottom: '20px',
         borderBottom: '1px solid #e0e0e0',
         paddingBottom: '15px'
       }}>
-        <h2 style={{ margin: 0, color: '#333' }}>商品富文本编辑器</h2>
-        <div style={{ fontSize: '14px', color: '#666' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px',
+          marginBottom: '10px'
+        }}>
+          <button
+            onClick={() => window.history.back()}
+            style={{
+              padding: '8px 12px',
+              backgroundColor: '#f5f5f5',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              fontSize: '14px',
+              color: '#333',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+            </svg>
+            返回
+          </button>
+          <h2 style={{ margin: 0, color: '#333' }}>商品富文本编辑器</h2>
+        </div>
+        <div style={{ fontSize: '14px', color: '#666', paddingLeft: '59px' }}>
           Saleor 富文本编辑器扩展
         </div>
       </div>

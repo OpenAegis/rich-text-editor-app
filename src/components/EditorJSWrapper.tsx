@@ -185,6 +185,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             onReady: async () => {
               // 初始化拖拽功能
               new DragDrop(editorRef.current);
+
+              // 初始化撤回/重做功能
+              new Undo({ editor: editorRef.current });
+
               console.log('EditorJS 初始化完成');
               console.log('Editor 实例:', editorRef.current);
               console.log('Editor 实例 isReady:', editorRef.current?.isReady);
@@ -208,13 +212,25 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             },
             tools: {
               // @ts-ignore
-              header: Header,
+              header: {
+                class: Header,
+                inlineToolbar: true,
+              },
               // @ts-ignore
-              list: List,
+              list: {
+                class: List,
+                inlineToolbar: true,
+              },
               // @ts-ignore
-              nestedList: NestedList,
+              nestedList: {
+                class: NestedList,
+                inlineToolbar: true,
+              },
               // @ts-ignore
-              checklist: Checklist,
+              checklist: {
+                class: Checklist,
+                inlineToolbar: true,
+              },
               // @ts-ignore
               image: {
                 class: Image,
@@ -231,9 +247,15 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               // @ts-ignore
               simpleImage: SimpleImage,
               // @ts-ignore
-              table: Table,
+              table: {
+                class: Table,
+                inlineToolbar: true,
+              },
               // @ts-ignore
-              quote: Quote,
+              quote: {
+                class: Quote,
+                inlineToolbar: true,
+              },
               // @ts-ignore
               code: Code,
               // @ts-ignore
@@ -248,7 +270,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               // @ts-ignore
               delimiter: Delimiter,
               // @ts-ignore
-              warning: Warning,
+              warning: {
+                class: Warning,
+                inlineToolbar: true,
+              },
               // @ts-ignore
               linkTool: {
                 class: LinkTool,
@@ -271,11 +296,20 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               // @ts-ignore
               embed: Embed,
               // @ts-ignore
-              alert: Alert,
+              alert: {
+                class: Alert,
+                inlineToolbar: true,
+              },
               // @ts-ignore
-              button: Button,
+              button: {
+                class: Button,
+                inlineToolbar: true,
+              },
               // @ts-ignore
-              toggle: ToggleBlock,
+              toggle: {
+                class: ToggleBlock,
+                inlineToolbar: true,
+              },
               // @ts-ignore
               marker: Marker,
               // @ts-ignore
