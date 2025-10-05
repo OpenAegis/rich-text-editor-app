@@ -11,12 +11,12 @@ html, body {
   padding: 0;
 }
 
-.custom-rich-editor-wrapper {
+.codex-editor {
   padding: 6px 8px;
 }
 
 @media (max-width: 650px) {
-  .custom-rich-editor-wrapper {
+  .codex-editor {
     padding: 6px 64px;
   }
 }

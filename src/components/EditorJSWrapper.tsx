@@ -235,10 +235,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                   undoRef.current = new Undo({
                     editor: editorRef.current,
                     config: {
-                      debounceTimer: 200,
+                      debounceTimer: 500,
                       shortcuts: {
                         undo: 'CMD+Z',
-                        redo: 'CMD+SHIFT+Z'
+                        redo: 'CMD+Y'
                       }
                     }
                   });
@@ -249,6 +249,16 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                     console.log('使用初始数据初始化撤销历史');
                     undoRef.current.initialize(currentData);
                   }
+
+                  // 添加额外的 CMD+SHIFT+Z 快捷键支持重做
+                  document.addEventListener('keydown', (e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'z') {
+                      e.preventDefault();
+                      if (undoRef.current && undoRef.current.redo) {
+                        undoRef.current.redo();
+                      }
+                    }
+                  });
 
                   // 标记初始内容加载完成
                   isLoadingInitialContent.current = false;
