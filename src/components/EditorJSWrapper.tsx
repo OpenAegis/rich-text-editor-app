@@ -106,6 +106,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             Underline,
             InlineCode,
             CustomColorTool,
+            CustomFontSizeTool,
             Undo,
             Checklist,
             Code,
@@ -145,6 +146,8 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             import('@editorjs/inline-code').then(m => m.default),
             // @ts-ignore
             import('./CustomColorTool').then(m => m.default),
+            // @ts-ignore
+            import('./CustomFontSizeTool').then(m => m.default),
             // @ts-ignore
             import('editorjs-undo').then(m => m.default),
             // @ts-ignore
@@ -198,7 +201,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: data,
-            inlineToolbar: ['bold', 'italic', 'link', 'color', 'marker', 'underline', 'inlineCode'], // 全局启用inline tools
+            inlineToolbar: ['bold', 'italic', 'link', 'color', 'fontSize', 'marker', 'underline', 'inlineCode'], // 全局启用inline tools
             onReady: async () => {
               console.log('EditorJS 初始化完成');
               console.log('Editor 实例:', editorRef.current);
@@ -398,6 +401,13 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                     '#FFFFFF'
                   ],
                   defaultColor: '#FF1300',
+                }
+              },
+              // @ts-ignore
+              fontSize: {
+                class: CustomFontSizeTool,
+                config: {
+                  fontSizes: [12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72]
                 }
               },
               // @ts-ignore
