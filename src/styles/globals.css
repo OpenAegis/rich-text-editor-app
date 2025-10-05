@@ -10,3 +10,13 @@ html, body {
   margin: 0;
   padding: 0;
 }
+
+.custom-rich-editor-wrapper {
+  padding: 6px 8px;
+}
+
+@media (max-width: 650px) {
+  .custom-rich-editor-wrapper {
+    padding: 6px 64px;
+  }
+}
