@@ -74,7 +74,7 @@
             width: 100%;
             min-height: 400px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
             background: white;
             margin-bottom: 16px;
@@ -184,7 +184,7 @@
             padding: 15px 20px;
             background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
             color: white;
-            border-radius: 4px;
+            border-radius: 6px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             z-index: 10000;
             font-size: 14px;

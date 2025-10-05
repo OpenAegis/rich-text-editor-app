@@ -72,7 +72,7 @@ export default class CustomColorTool {
       z-index: 10000;
       background: white;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
       padding: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       display: grid;
@@ -94,7 +94,7 @@ export default class CustomColorTool {
         width: 30px;
         height: 30px;
         border: 2px solid #ddd;
-        border-radius: 4px;
+        border-radius: 6px;
         background-color: ${color};
         cursor: pointer;
         transition: transform 0.2s;
@@ -135,7 +135,7 @@ export default class CustomColorTool {
       width: 100%;
       height: 30px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
     `;
 
