@@ -573,12 +573,12 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   };
 
   if (!isClient) {
-    return <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: isEmbedded ? '16px' : '200px' }}>加载中...</div>;
+    return <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: '300px' }}>加载中...</div>;
   }
 
   return (
     <div>
-      <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: isEmbedded ? '16px' : '200px' }}>加载中...</div>
+      <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: '300px' }}>加载中...</div>
       <div style={{ marginLeft: isEmbedded ? '2px' : 'none', marginTop: '16px' }}>
         <Button onClick={handleSave} variant="primary">
           保存富文本内容

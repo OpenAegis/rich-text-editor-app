@@ -15,6 +15,16 @@ html, body {
   padding: 6px 8px;
 }
 
+.ce-toolbar__content {
+    max-width: calc(100% - 60px) !important;
+    margin: 0 auto;
+}
+
+.ce-block__content {
+    max-width: 650px;
+    margin: 0px 0px 0px 60px !important;
+}
+
 @media (max-width: 650px) {
   .codex-editor {
     padding: 6px 64px;
