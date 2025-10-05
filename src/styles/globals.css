@@ -25,6 +25,10 @@ html, body {
     margin: 0px 0px 0px 60px !important;
 }
 
+.codex-editor__redactor {
+    padding-bottom: 16px !important;
+}
+
 @media (max-width: 650px) {
   .codex-editor {
     padding: 6px 64px;
