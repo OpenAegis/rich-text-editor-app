@@ -5,6 +5,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const editorRef = useRef<any>(null);
   const holderRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
+  const undoRef = useRef<any>(null);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -187,7 +188,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               new DragDrop(editorRef.current);
 
               // 初始化撤回/重做功能
-              new Undo({ editor: editorRef.current });
+              undoRef.current = new Undo({ editor: editorRef.current });
 
               console.log('EditorJS 初始化完成');
               console.log('Editor 实例:', editorRef.current);
@@ -197,6 +198,22 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               } else {
                 console.warn('Editor isReady not available, skipping await');
               }
+
+              // 清空撤销历史，防止撤回到空内容
+              if (undoRef.current && savedContent) {
+                console.log('清空撤销历史以防止撤回到初始加载前的状态');
+                // 等待一小段时间确保内容已完全渲染
+                setTimeout(() => {
+                  if (undoRef.current && undoRef.current.clear) {
+                    undoRef.current.clear();
+                  }
+                  // 手动初始化撤销历史，将当前状态作为起点
+                  if (undoRef.current && undoRef.current.initialize) {
+                    undoRef.current.initialize(editorRef.current);
+                  }
+                }, 100);
+              }
+
               // 检查inlineToolbar API
               if (editorRef.current && editorRef.current.api && editorRef.current.api.inlineToolbar) {
                 console.log('InlineToolbar API available:', typeof editorRef.current.api.inlineToolbar);
