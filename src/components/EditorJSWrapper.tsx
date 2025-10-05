@@ -181,7 +181,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: data,
-            inlineToolbar: ['color', 'marker', 'underline', 'inlineCode'], // 全局启用inline tools
+            inlineToolbar: ['bold', 'italic', 'link', 'color', 'marker', 'underline', 'inlineCode'], // 全局启用inline tools
             onReady: async () => {
               // 初始化拖拽功能
               new DragDrop(editorRef.current);

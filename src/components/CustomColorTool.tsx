@@ -55,17 +55,17 @@ export default class CustomColorTool {
       return;
     }
 
-    const selectedText = range.extractContents();
-    const span = document.createElement(this.tag);
+    // Save the original range for restoration if user cancels
+    const originalRange = range.cloneRange();
 
-    // Show color picker
-    this.showColorPicker(span, range, selectedText);
+    // Show color picker without removing content
+    this.showColorPicker(range, originalRange);
   }
 
   /**
    * Show color picker popup
    */
-  private showColorPicker(span: HTMLElement, range: Range, selectedText: DocumentFragment): void {
+  private showColorPicker(range: Range, originalRange: Range): void {
     const picker = document.createElement('div');
     picker.style.cssText = `
       position: absolute;
@@ -109,20 +109,11 @@ export default class CustomColorTool {
       };
 
       colorButton.onclick = () => {
-        span.style.color = color;
-        span.appendChild(selectedText);
-        range.insertNode(span);
+        this.applyColor(color, range, originalRange);
 
         // Remove picker
-        document.body.removeChild(picker);
-
-        // Restore selection
-        const selection = window.getSelection();
-        if (selection) {
-          selection.removeAllRanges();
-          const newRange = document.createRange();
-          newRange.selectNodeContents(span);
-          selection.addRange(newRange);
+        if (document.body.contains(picker)) {
+          document.body.removeChild(picker);
         }
       };
 
@@ -149,20 +140,11 @@ export default class CustomColorTool {
     `;
 
     customColorInput.onchange = () => {
-      span.style.color = customColorInput.value;
-      span.appendChild(selectedText);
-      range.insertNode(span);
+      this.applyColor(customColorInput.value, range, originalRange);
 
       // Remove picker
-      document.body.removeChild(picker);
-
-      // Restore selection
-      const selection = window.getSelection();
-      if (selection) {
-        selection.removeAllRanges();
-        const newRange = document.createRange();
-        newRange.selectNodeContents(span);
-        selection.addRange(newRange);
+      if (document.body.contains(picker)) {
+        document.body.removeChild(picker);
       }
     };
 
@@ -171,12 +153,20 @@ export default class CustomColorTool {
 
     document.body.appendChild(picker);
 
-    // Close picker when clicking outside
+    // Close picker when clicking outside (cancel action - restore original selection)
     const closePickerOnClickOutside = (e: MouseEvent) => {
       if (!picker.contains(e.target as Node)) {
         if (document.body.contains(picker)) {
           document.body.removeChild(picker);
         }
+
+        // Restore original selection when user cancels
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(originalRange);
+        }
+
         document.removeEventListener('click', closePickerOnClickOutside);
       }
     };
@@ -184,6 +174,31 @@ export default class CustomColorTool {
     setTimeout(() => {
       document.addEventListener('click', closePickerOnClickOutside);
     }, 100);
+  }
+
+  /**
+   * Apply color to selected text
+   */
+  private applyColor(color: string, range: Range, originalRange: Range): void {
+    // Extract the selected content
+    const selectedText = range.extractContents();
+
+    // Create span with color
+    const span = document.createElement(this.tag);
+    span.style.color = color;
+    span.appendChild(selectedText);
+
+    // Insert the colored span
+    range.insertNode(span);
+
+    // Select the newly colored text
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      selection.addRange(newRange);
+    }
   }
 
   /**
