@@ -52,7 +52,7 @@ export default function RichEditor() {
 
       // 只在高度变化超过阈值时才发送（避免微小变化导致的循环）
       const heightDiff = Math.abs(currentHeight - lastHeight);
-      if (heightDiff < 50) {
+      if (heightDiff < 3) {
         return;
       }
 
