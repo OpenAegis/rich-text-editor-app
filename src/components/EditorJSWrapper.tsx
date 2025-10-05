@@ -9,10 +9,15 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const initializedRef = useRef(false);
   const undoRef = useRef<any>(null);
   const [isClient, setIsClient] = useState(false);
+  const [isEmbedded, setIsEmbedded] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    
+
+    // 检查是否在 embedded 模式
+    const urlParams = new URLSearchParams(window.location.search);
+    setIsEmbedded(urlParams.get('embedded') === 'true');
+
     const loadSavedContent = async () => {
       try {
         // 确保 productId 是有效的
@@ -533,12 +538,12 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   };
 
   if (!isClient) {
-    return <div ref={holderRef} style={{ border: '1px solid #ccc', minHeight: '300px' }}>加载中...</div>;
+    return <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: '300px' }}>加载中...</div>;
   }
 
   return (
     <div>
-      <div ref={holderRef} style={{ border: '1px solid #ccc', minHeight: '300px' }}></div>
+      <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: '300px' }}>加载中...</div>
       <div style={{ marginTop: '16px' }}>
         <Button onClick={handleSave} variant="primary">
           保存富文本内容
