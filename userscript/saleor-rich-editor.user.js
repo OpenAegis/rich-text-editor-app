@@ -138,11 +138,11 @@
 
                 // 防抖：300ms 内多次调整只执行最后一次
                 resizeDebounceTimer = setTimeout(() => {
-                    // 最小高度 400px，使用实际高度（不添加额外缓冲）
-                    const newHeight = Math.max(400, data.height);
+                    // 最小高度 400px，添加小缓冲以避免高度不足
+                    const newHeight = Math.max(400, data.height + 2);
 
                     // 只在高度真正变化时才调整
-                    if (Math.abs(newHeight - lastIframeHeight) > 10) {
+                    if (Math.abs(newHeight - lastIframeHeight) > 5) {
                         lastIframeHeight = newHeight;
                         iframe.style.height = newHeight + 'px';
                         console.log('✓ iframe 高度已调整:', newHeight + 'px');
@@ -202,11 +202,18 @@
         }, 3000);
     }
 
-    // 添加动画样式和隐藏默认编辑器的样式
+    // 添加动画样式、隐藏默认编辑器和编辑器样式
     const style = document.createElement('style');
     style.textContent = `
         .MuiFormControl-fullWidth {
             display: none;
+        }
+        .ce-block__content {
+            position: relative;
+            max-width: 100%;
+            margin: 0px 1.5rem;
+            -webkit-transition: background-color .15s ease;
+            transition: background-color .15s ease;
         }
         @keyframes slideIn {
             from {
@@ -290,6 +297,57 @@
         }
     }
 
+    // 监听 URL 变化（支持 SPA 单页应用）
+    let lastUrl = location.href;
+
+    function checkUrlChange() {
+        const currentUrl = location.href;
+        if (currentUrl !== lastUrl) {
+            console.log('检测到 URL 变化:', lastUrl, '->', currentUrl);
+            lastUrl = currentUrl;
+
+            // URL 变化后延迟执行，等待新页面渲染
+            setTimeout(() => {
+                findAndReplaceEditor();
+            }, 1000);
+        }
+    }
+
+    // 使用 MutationObserver 监听 URL 变化
+    const urlObserver = new MutationObserver(checkUrlChange);
+    urlObserver.observe(document.querySelector('title') || document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // 监听 popstate 事件（浏览器前进/后退）
+    window.addEventListener('popstate', () => {
+        console.log('检测到浏览器导航（前进/后退）');
+        setTimeout(() => {
+            findAndReplaceEditor();
+        }, 1000);
+    });
+
+    // 拦截 pushState 和 replaceState
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function() {
+        originalPushState.apply(this, arguments);
+        console.log('检测到 pushState 导航');
+        setTimeout(() => {
+            findAndReplaceEditor();
+        }, 1000);
+    };
+
+    history.replaceState = function() {
+        originalReplaceState.apply(this, arguments);
+        console.log('检测到 replaceState 导航');
+        setTimeout(() => {
+            findAndReplaceEditor();
+        }, 1000);
+    };
+
     // 页面加载完成后执行
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', findAndReplaceEditor);
@@ -297,5 +355,5 @@
         findAndReplaceEditor();
     }
 
-    console.log('Saleor 富文本编辑器增强脚本已加载');
+    console.log('Saleor 富文本编辑器增强脚本已加载（支持 SPA 路由）');
 })();
