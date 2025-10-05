@@ -101,8 +101,7 @@ export default function RichEditor() {
   return (
     <div className="custom-rich-editor-wrapper" style={isEmbedded ? {
       padding: '0',
-      margin: '0',
-      borderBottom: '1px solid #e0e0e0'
+      margin: '0'
     } : {
       padding: '20px',
       maxWidth: '1200px',

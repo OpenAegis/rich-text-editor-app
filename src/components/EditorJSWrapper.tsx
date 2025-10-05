@@ -544,7 +544,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   return (
     <div>
       <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: '300px' }}>加载中...</div>
-      <div style={{ marginTop: '16px' }}>
+      <div style={{ marginLeft: isEmbedded ? '2px' : 'none', marginTop: '16px' }}>
         <Button onClick={handleSave} variant="primary">
           保存富文本内容
         </Button>
