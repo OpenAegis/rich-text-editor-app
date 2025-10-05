@@ -73,7 +73,7 @@ export default function RichEditor() {
       }
       debounceTimer = setTimeout(() => {
         sendHeightToParent();
-      }, 500); // 500ms 防抖
+      }, 100); // 100ms 防抖
     };
 
     // 初始发送（延迟一下等待内容渲染）
