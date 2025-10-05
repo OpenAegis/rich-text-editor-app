@@ -1,5 +1,7 @@
 // @ts-ignore
 import { useEffect, useRef, useState } from 'react';
+// @ts-ignore
+import { Button } from '@saleor/macaw-ui';
 
 const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const editorRef = useRef<any>(null);
@@ -537,9 +539,11 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   return (
     <div>
       <div ref={holderRef} style={{ border: '1px solid #ccc', minHeight: '300px' }}></div>
-      <button onClick={handleSave} style={{ marginTop: '10px', padding: '10px 20px' }}>
-        保存富文本内容
-      </button>
+      <div style={{ marginTop: '16px' }}>
+        <Button onClick={handleSave} variant="primary">
+          保存富文本内容
+        </Button>
+      </div>
     </div>
   );
 };
