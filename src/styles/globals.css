@@ -12,11 +12,11 @@ html, body {
 }
 
 .codex-editor {
-  padding: 6px 6px 6px 64px;
+  padding: 6px 6px 6px 72px;
 }
 
 .ce-toolbar__content {
-    max-width: calc(100% - 140px) !important;
+    max-width: calc(100% - 136px) !important;
     margin: 0 auto;
 }
 
