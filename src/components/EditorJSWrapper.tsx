@@ -8,6 +8,7 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   const holderRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
   const undoRef = useRef<any>(null);
+  const isLoadingInitialContent = useRef(false);
   const [isClient, setIsClient] = useState(false);
   const [isEmbedded, setIsEmbedded] = useState(false);
 
@@ -191,17 +192,14 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
             data.blocks = [];
           }
 
+          // 标记正在加载初始内容
+          isLoadingInitialContent.current = (savedContent && data.blocks.length > 0);
+
           const editorConfig = {
             holder: holderElement,  // 使用 DOM 元素而不是 ID 字符串
             data: data,
             inlineToolbar: ['bold', 'italic', 'link', 'color', 'marker', 'underline', 'inlineCode'], // 全局启用inline tools
             onReady: async () => {
-              // 初始化拖拽功能
-              new DragDrop(editorRef.current);
-
-              // 初始化撤回/重做功能
-              undoRef.current = new Undo({ editor: editorRef.current });
-
               console.log('EditorJS 初始化完成');
               console.log('Editor 实例:', editorRef.current);
               console.log('Editor 实例 isReady:', editorRef.current?.isReady);
@@ -211,28 +209,23 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 console.warn('Editor isReady not available, skipping await');
               }
 
-              // 清空撤销历史，防止撤回到空内容
-              if (savedContent && data && data.blocks && data.blocks.length > 0) {
-                console.log('清空撤销历史以防止撤回到初始加载前的状态');
-                // 等待一小段时间确保内容已完全渲染，然后清空撤销栈
-                setTimeout(() => {
-                  try {
-                    // editorjs-undo 插件会自动记录初始状态
-                    // 我们需要等待编辑器完全初始化后再清空撤销栈
-                    if (undoRef.current) {
-                      // 检查撤销插件是否有 clear 方法
-                      console.log('Undo instance methods:', Object.keys(undoRef.current));
+              // 初始化拖拽功能
+              new DragDrop(editorRef.current);
 
-                      // 重新初始化撤销插件以清空历史
-                      undoRef.current.destroy?.();
-                      undoRef.current = new Undo({ editor: editorRef.current });
-                      console.log('撤销历史已重置');
-                    }
-                  } catch (error) {
-                    console.error('清空撤销历史失败:', error);
+              // 等待内容完全渲染后再初始化撤销功能
+              setTimeout(() => {
+                console.log('初始化撤销/重做功能');
+                undoRef.current = new Undo({
+                  editor: editorRef.current,
+                  config: {
+                    debounceTimer: 200
                   }
-                }, 300);
-              }
+                });
+
+                // 标记初始内容加载完成
+                isLoadingInitialContent.current = false;
+                console.log('撤销功能初始化完成，起点为当前已加载的内容');
+              }, 500);
 
               // 检查inlineToolbar API
               if (editorRef.current && editorRef.current.api && editorRef.current.api.inlineToolbar) {
@@ -551,12 +544,12 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   };
 
   if (!isClient) {
-    return <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: '300px' }}>加载中...</div>;
+    return <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: isEmbedded ? 'none' : '300px' }}>加载中...</div>;
   }
 
   return (
     <div>
-      <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: '300px' }}>加载中...</div>
+      <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: isEmbedded ? 'none' : '300px' }}>加载中...</div>
       <div style={{ marginLeft: isEmbedded ? '2px' : 'none', marginTop: '16px' }}>
         <Button onClick={handleSave} variant="primary">
           保存富文本内容
