@@ -528,22 +528,24 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       
       if (result.success) {
         // 显示成功通知
-        // @ts-ignore
-        appBridge.dispatch({
-          type: "notification",
-          payload: {
-            actionId: "save-success",
-            status: "success",
-            title: "富文本内容已保存"
-          }
-        });
-
         // 如果在 iframe 中，通知父窗口保存成功
         if (window.self !== window.top) {
           window.parent.postMessage({
             type: 'contentSaved',
             content: outputData
           }, '*');
+        } else {
+          // 否则显示成功通知
+          // @ts-ignore
+          appBridge.dispatch({
+            type: "notification",
+            payload: {
+              actionId: "save-success",
+              status: "success",
+              title: "保存成功",
+              text: "内容已保存"
+            }
+          });
         }
       } else {
         throw new Error(result.message || '保存失败');
