@@ -72,7 +72,7 @@
         container.style.cssText = `
             position: relative;
             width: 100%;
-            min-height: 400px;
+            min-height: 300px;
             border: 1px solid #ddd;
             border-radius: 6px;
             overflow: hidden;
@@ -85,7 +85,7 @@
         iframe.className = 'custom-rich-editor-iframe';
         iframe.style.cssText = `
             width: 100%;
-            height: 400px;
+            height: 300px;
             border: none;
             display: block;
             transition: height 0.3s ease;
@@ -105,7 +105,7 @@
 
         // 防抖计时器
         let resizeDebounceTimer = null;
-        let lastIframeHeight = 400;
+        let lastIframeHeight = 300;
 
         // 监听来自 iframe 的消息
         const messageHandler = function(event) {
@@ -138,8 +138,8 @@
 
                 // 防抖：300ms 内多次调整只执行最后一次
                 resizeDebounceTimer = setTimeout(() => {
-                    // 最小高度 400px，添加小缓冲以避免高度不足
-                    const newHeight = Math.max(400, data.height + 2);
+                    // 最小高度 300px，添加小缓冲以避免高度不足
+                    const newHeight = Math.max(300, data.height + 2);
 
                     // 只在高度真正变化时才调整
                     if (Math.abs(newHeight - lastIframeHeight) > 5) {

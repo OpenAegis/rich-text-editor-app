@@ -16,12 +16,12 @@ html, body {
 }
 
 .ce-toolbar__content {
-    max-width: calc(100% - 60px) !important;
+    max-width: calc(100% - 140px) !important;
     margin: 0 auto;
 }
 
 .ce-block__content {
-    max-width: 650px;
+    max-width: 100% !important;
     /* margin: 0px 0px 0px 60px !important; */
 }
 
