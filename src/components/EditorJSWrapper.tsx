@@ -212,21 +212,6 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               // 初始化拖拽功能
               new DragDrop(editorRef.current);
 
-              // 等待内容完全渲染后再初始化撤销功能
-              setTimeout(() => {
-                console.log('初始化撤销/重做功能');
-                undoRef.current = new Undo({
-                  editor: editorRef.current,
-                  config: {
-                    debounceTimer: 200
-                  }
-                });
-
-                // 标记初始内容加载完成
-                isLoadingInitialContent.current = false;
-                console.log('撤销功能初始化完成，起点为当前已加载的内容');
-              }, 500);
-
               // 检查inlineToolbar API
               if (editorRef.current && editorRef.current.api && editorRef.current.api.inlineToolbar) {
                 console.log('InlineToolbar API available:', typeof editorRef.current.api.inlineToolbar);
@@ -236,6 +221,40 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               console.log('Editor configuration:', editorRef.current?.configuration);
               console.log('EditorJS 完全就绪');
               initializedRef.current = true;
+
+              // 等待内容完全渲染并完成所有初始化后再初始化撤销功能
+              // 确保编辑器内容稳定后才记录撤销历史
+              setTimeout(async () => {
+                console.log('初始化撤销/重做功能');
+
+                // 获取当前编辑器数据确保有内容
+                if (editorRef.current) {
+                  const currentData = await editorRef.current.save();
+                  console.log('当前编辑器内容块数:', currentData.blocks.length);
+
+                  undoRef.current = new Undo({
+                    editor: editorRef.current,
+                    config: {
+                      debounceTimer: 200,
+                      shortcuts: {
+                        undo: 'CMD+Z',
+                        redo: 'CMD+SHIFT+Z'
+                      }
+                    }
+                  });
+
+                  // 关键：如果有初始数据，必须调用 initialize 方法
+                  // 否则默认的初始撤销状态会导致编辑器为空
+                  if (savedContent && currentData.blocks.length > 0) {
+                    console.log('使用初始数据初始化撤销历史');
+                    undoRef.current.initialize(currentData);
+                  }
+
+                  // 标记初始内容加载完成
+                  isLoadingInitialContent.current = false;
+                  console.log('撤销功能初始化完成，起点为当前已加载的内容');
+                }
+              }, 1000);
             },
             onChange: (api: any, event: any) => {
               console.log('Editor 内容变化:', event);
@@ -544,12 +563,12 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
   };
 
   if (!isClient) {
-    return <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: isEmbedded ? '300px' : 'none' }}>加载中...</div>;
+    return <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: isEmbedded ? '16px' : 'none' }}>加载中...</div>;
   }
 
   return (
     <div>
-      <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: isEmbedded ? '300px' : 'none' }}>加载中...</div>
+      <div ref={holderRef} style={{ border: isEmbedded ? 'none' : '1px solid #ccc', minHeight: isEmbedded ? '16px' : 'none' }}>加载中...</div>
       <div style={{ marginLeft: isEmbedded ? '2px' : 'none', marginTop: '16px' }}>
         <Button onClick={handleSave} variant="primary">
           保存富文本内容
