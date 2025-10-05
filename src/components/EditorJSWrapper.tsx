@@ -91,90 +91,95 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
       
       if (typeof window !== 'undefined') {
         try {
-          // @ts-ignore
-          const EditorJS = (await import('@editorjs/editorjs')).default;
-          console.log('EditorJS 导入成功:', EditorJS);
-          
-          // @ts-ignore
-          const Header = (await import('@editorjs/header')).default;
-          console.log('Header imported:', typeof Header);
-          // @ts-ignore
-          const List = (await import('@editorjs/list')).default;
-          console.log('List imported:', typeof List);
-          // @ts-ignore
-          const Image = (await import('@editorjs/image')).default;
-          console.log('Image imported:', typeof Image);
-          // @ts-ignore
-          const Table = (await import('@editorjs/table')).default;
-          console.log('Table imported:', typeof Table);
-          // @ts-ignore
-          const Quote = (await import('@editorjs/quote')).default;
-          console.log('Quote imported:', typeof Quote);
-          // @ts-ignore
-          const Embed = (await import('@editorjs/embed')).default;
-          console.log('Embed imported:', typeof Embed);
-          // @ts-ignore
-          const Marker = (await import('@editorjs/marker')).default;
-          console.log('Marker imported:', typeof Marker);
-          // @ts-ignore
-          const Underline = (await import('@editorjs/underline')).default;
-          console.log('Underline imported:', typeof Underline);
-          // @ts-ignore
-          const InlineCode = (await import('@editorjs/inline-code')).default;
-          console.log('InlineCode imported:', typeof InlineCode);
-          // @ts-ignore
-          const CustomColorTool = (await import('./CustomColorTool')).default;
-          console.log('CustomColorTool imported:', typeof CustomColorTool);
-          // @ts-ignore
-          const Undo = (await import('editorjs-undo')).default;
-          console.log('Undo imported:', typeof Undo);
-          // @ts-ignore
-          const Checklist = (await import('@editorjs/checklist')).default;
-          console.log('Checklist imported:', typeof Checklist);
-          // @ts-ignore
-          const Code = (await import('@editorjs/code')).default;
-          console.log('Code imported:', typeof Code);
-          // @ts-ignore
-          const CodeBox = (await import('@bomdi/codebox')).default;
-          console.log('CodeBox imported:', typeof CodeBox);
-          // @ts-ignore
-          const Delimiter = (await import('@editorjs/delimiter')).default;
-          console.log('Delimiter imported:', typeof Delimiter);
-          // @ts-ignore
-          const Warning = (await import('@editorjs/warning')).default;
-          console.log('Warning imported:', typeof Warning);
-          // @ts-ignore
-          const LinkTool = (await import('@editorjs/link')).default;
-          console.log('LinkTool imported:', typeof LinkTool);
-          // @ts-ignore
-          const Raw = (await import('@editorjs/raw')).default;
-          console.log('Raw imported:', typeof Raw);
-          // @ts-ignore
-          const SimpleImage = (await import('@editorjs/simple-image')).default;
-          console.log('SimpleImage imported:', typeof SimpleImage);
-          // @ts-ignore
-          const Attaches = (await import('@editorjs/attaches')).default;
-          console.log('Attaches imported:', typeof Attaches);
-          // @ts-ignore
-          const NestedList = (await import('@editorjs/nested-list')).default;
-          console.log('NestedList imported:', typeof NestedList);
-          // @ts-ignore
-          const Alert = (await import('editorjs-alert')).default;
-          console.log('Alert imported:', typeof Alert);
-          // @ts-ignore
-          const Button = (await import('editorjs-button')).default;
-          console.log('Button imported:', typeof Button);
-          // @ts-ignore
-          const ToggleBlock = (await import('editorjs-toggle-block')).default;
-          console.log('ToggleBlock imported:', typeof ToggleBlock);
-          // @ts-ignore
-          const AlignmentTune = (await import('editorjs-text-alignment-blocktune')).default;
-          console.log('AlignmentTune imported:', typeof AlignmentTune);
-          // @ts-ignore
-          const DragDrop = (await import('editorjs-drag-drop')).default;
-          console.log('DragDrop imported:', typeof DragDrop);
+          // 并行导入所有工具以提高加载速度
+          console.log('开始并行导入所有工具...');
+          const [
+            EditorJS,
+            Header,
+            List,
+            Image,
+            Table,
+            Quote,
+            Embed,
+            Marker,
+            Underline,
+            InlineCode,
+            CustomColorTool,
+            Undo,
+            Checklist,
+            Code,
+            CodeBox,
+            Delimiter,
+            Warning,
+            LinkTool,
+            Raw,
+            SimpleImage,
+            Attaches,
+            NestedList,
+            Alert,
+            Button,
+            ToggleBlock,
+            AlignmentTune,
+            DragDrop
+          ] = await Promise.all([
+            // @ts-ignore
+            import('@editorjs/editorjs').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/header').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/list').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/image').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/table').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/quote').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/embed').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/marker').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/underline').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/inline-code').then(m => m.default),
+            // @ts-ignore
+            import('./CustomColorTool').then(m => m.default),
+            // @ts-ignore
+            import('editorjs-undo').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/checklist').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/code').then(m => m.default),
+            // @ts-ignore
+            import('@bomdi/codebox').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/delimiter').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/warning').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/link').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/raw').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/simple-image').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/attaches').then(m => m.default),
+            // @ts-ignore
+            import('@editorjs/nested-list').then(m => m.default),
+            // @ts-ignore
+            import('editorjs-alert').then(m => m.default),
+            // @ts-ignore
+            import('editorjs-button').then(m => m.default),
+            // @ts-ignore
+            import('editorjs-toggle-block').then(m => m.default),
+            // @ts-ignore
+            import('editorjs-text-alignment-blocktune').then(m => m.default),
+            // @ts-ignore
+            import('editorjs-drag-drop').then(m => m.default),
+          ]);
+
           console.log('所有插件导入成功');
-            console.log('导入的工具组件:', { Header, List, Image, Table, Quote, Embed, Marker, Underline, InlineCode, Undo, Checklist, Code, CodeBox, Delimiter, Warning, LinkTool, Raw, SimpleImage, Attaches, NestedList, Alert, Button, ToggleBlock, AlignmentTune, DragDrop });
+          console.log('导入的工具组件:', { Header, List, Image, Table, Quote, Embed, Marker, Underline, InlineCode, Undo, Checklist, Code, CodeBox, Delimiter, Warning, LinkTool, Raw, SimpleImage, Attaches, NestedList, Alert, Button, ToggleBlock, AlignmentTune, DragDrop });
 
           // 加载保存的内容
           const savedContent = await loadSavedContent();
@@ -207,18 +212,26 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
               }
 
               // 清空撤销历史，防止撤回到空内容
-              if (undoRef.current && savedContent) {
+              if (savedContent && data && data.blocks && data.blocks.length > 0) {
                 console.log('清空撤销历史以防止撤回到初始加载前的状态');
-                // 等待一小段时间确保内容已完全渲染
+                // 等待一小段时间确保内容已完全渲染，然后清空撤销栈
                 setTimeout(() => {
-                  if (undoRef.current && undoRef.current.clear) {
-                    undoRef.current.clear();
+                  try {
+                    // editorjs-undo 插件会自动记录初始状态
+                    // 我们需要等待编辑器完全初始化后再清空撤销栈
+                    if (undoRef.current) {
+                      // 检查撤销插件是否有 clear 方法
+                      console.log('Undo instance methods:', Object.keys(undoRef.current));
+
+                      // 重新初始化撤销插件以清空历史
+                      undoRef.current.destroy?.();
+                      undoRef.current = new Undo({ editor: editorRef.current });
+                      console.log('撤销历史已重置');
+                    }
+                  } catch (error) {
+                    console.error('清空撤销历史失败:', error);
                   }
-                  // 手动初始化撤销历史，将当前状态作为起点
-                  if (undoRef.current && undoRef.current.initialize) {
-                    undoRef.current.initialize(editorRef.current);
-                  }
-                }, 100);
+                }, 300);
               }
 
               // 检查inlineToolbar API
