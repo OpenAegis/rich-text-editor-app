@@ -107,7 +107,7 @@ To store this data, app-template use a different [APL interfaces](https://docs.s
 The choice of the APL is made using the `APL` environment variable. If the value is not set, FileAPL is used. Available choices:
 
 - `file`: no additional setup is required. Good choice for local development. It can't be used for multi tenant-apps or be deployed (not intended for production)
-- `upstash`: use [Upstash](https://upstash.com/) Redis as storage method. Free account required. It can be used for development and production and supports multi-tenancy. Requires `UPSTASH_URL` and `UPSTASH_TOKEN` environment variables to be set
+- `turso`: use [Turso](https://turso.tech/) (libSQL/SQLite) as storage method. It can be used for development and production and supports multi-tenancy. Requires `TURSO_DATABASE_URL` and optionally `TURSO_AUTH_TOKEN` environment variables to be set
 
 If you want to use your own database, you can implement your own APL. [Check the documentation to read more](https://docs.saleor.io/developer/extending/apps/developing-apps/app-sdk/apl).
 
@@ -122,4 +122,4 @@ This app can be deployed to Vercel. To ensure proper deployment:
    - `APP_IFRAME_BASE_URL` - The base URL where your app will be hosted
    - `APP_API_BASE_URL` - The base URL where your app's API will be accessible
 
-For production deployments, consider using a proper APL implementation like Upstash instead of the default FileAPL.
+For production deployments, consider using a proper APL implementation like Turso instead of the default FileAPL.
