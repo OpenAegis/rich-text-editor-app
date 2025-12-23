@@ -76,16 +76,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('Using direct API access, trying to get stored auth data');
       
       try {
-        // 尝试使用FileAPL的getAll方法获取第一个可用的认证数据
+        // 从当前 APL（File/Turso/...）中取第一个可用的认证数据
         const allAuthData = await saleorApp.apl.getAll();
-        const authEntries = Object.entries(allAuthData);
-        
-        if (authEntries.length > 0) {
-          const [firstSaleorApiUrl, firstAuthData] = authEntries[0];
-          authData = firstAuthData;
-          saleorApiUrl = firstSaleorApiUrl;
+
+        if (allAuthData.length > 0) {
+          authData = allAuthData[0];
+          saleorApiUrl = authData.saleorApiUrl;
           receivedToken = authData.token;
-          console.log('Using first available auth data from FileAPL');
+          console.log('Using first available auth data from APL');
         } else {
           return res.status(401).json({
             success: false,
@@ -93,8 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
         }
       } catch (error: any) {
-        // UpstashAPL不支持getAll，尝试使用环境变量
-        console.log('APL does not support getAll, trying environment fallback');
+        console.log('Failed to get auth data from APL, trying environment fallback');
         
         // 从环境变量获取默认的Saleor API URL
         const defaultSaleorUrl = process.env.SALEOR_API_URL || 'https://api.lzsm.shop/graphql/';
@@ -104,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           if (authData) {
             saleorApiUrl = defaultSaleorUrl;
             receivedToken = authData.token;
-            console.log('Using stored auth data from UpstashAPL');
+            console.log('Using stored auth data for default Saleor API URL');
           } else {
             return res.status(401).json({
               success: false,
