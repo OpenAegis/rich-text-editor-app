@@ -185,6 +185,22 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
           console.log('所有插件导入成功');
           console.log('导入的工具组件:', { Header, List, Image, Table, Quote, Embed, Marker, Underline, InlineCode, Undo, Checklist, Code, CodeBox, Delimiter, Warning, LinkTool, Raw, SimpleImage, Attaches, NestedList, Alert, Button, ToggleBlock, AlignmentTune, DragDrop });
 
+          class ExternalImageTool extends SimpleImage {
+            static get toolbox() {
+              return {
+                title: '外链图片',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none">
+  <path d="M4 7a3 3 0 0 1 3-3h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M20 17a3 3 0 0 1-3 3h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M14 4h6v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M20 4l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M4 14v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M4 20l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>`,
+              };
+            }
+          }
+
           // 加载保存的内容
           const savedContent = await loadSavedContent();
           console.log('Loaded savedContent:', savedContent);
@@ -307,7 +323,10 @@ const EditorJSWrapper = ({ appBridge, productId }: any) => {
                 }
               },
               // @ts-ignore
-              simpleImage: SimpleImage,
+              simpleImage: {
+                class: ExternalImageTool,
+                inlineToolbar: true,
+              },
               // @ts-ignore
               table: {
                 class: Table,
